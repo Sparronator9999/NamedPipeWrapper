@@ -12,7 +12,7 @@ namespace NamedPipeWrapper
     /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
     /// </summary>
     /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
-    public class NamedPipeServer<TReadWrite> : Server<TReadWrite, TReadWrite> where TReadWrite : class
+    public class NamedPipeServer<TReadWrite> : NamedPipeServer<TReadWrite, TReadWrite> where TReadWrite : class
     {
         /// <summary>
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
@@ -39,7 +39,7 @@ namespace NamedPipeWrapper
     /// </summary>
     /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
     /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
-    public class Server<TRead, TWrite>
+    public class NamedPipeServer<TRead, TWrite>
         where TRead : class
         where TWrite : class
     {
@@ -78,7 +78,7 @@ namespace NamedPipeWrapper
         /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
         /// </summary>
         /// <param name="pipeName">Name of the pipe to listen on</param>
-        public Server(string pipeName)
+        public NamedPipeServer(string pipeName)
         {
             LogDebug("Initialized");
             _pipeName = pipeName;
@@ -90,7 +90,7 @@ namespace NamedPipeWrapper
         /// <param name="pipeName">Name of the pipe to listen on</param>
         /// <param name="bufferSize">Size of input and output buffer</param>
         /// <param name="security">And object that determine the access control and audit security for the pipe</param>
-        public Server(string pipeName, int bufferSize, PipeSecurity security)
+        public NamedPipeServer(string pipeName, int bufferSize, PipeSecurity security)
         {
             LogDebug("Initialized");
             _pipeName = pipeName;

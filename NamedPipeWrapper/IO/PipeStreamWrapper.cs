@@ -7,56 +7,73 @@ using Twosense.WindowsService.ExposedInterfaces;
 namespace NamedPipeWrapper.IO
 {
     /// <summary>
-    /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
+    /// Wraps a <see cref="PipeStream"/> object
+    /// to read and write .NET CLR objects.
     /// </summary>
-    /// <typeparam name="TReadWrite">Reference type to read from and write to the pipe</typeparam>
+    /// <typeparam name="TReadWrite">
+    /// The reference type to read from and write to the pipe.
+    /// </typeparam>
     public class PipeStreamWrapper<TReadWrite> : PipeStreamWrapper<TReadWrite, TReadWrite>
         where TReadWrite : class
     {
         /// <summary>
-        /// Constructs a new <c>PipeStreamWrapper</c> object that reads from and writes to the given <paramref name="stream"/>.
+        /// Constructs a new <see cref="PipeStreamWrapper{TReadWrite}"/> object
+        /// that reads from and writes to the given <paramref name="stream"/>.
         /// </summary>
-        /// <param name="stream">Stream to read from and write to</param>
+        /// <param name="stream">
+        /// The pipe stream to read from and write to.
+        /// </param>
         public PipeStreamWrapper(PipeStream stream) : base(stream)
         {
         }
     }
 
     /// <summary>
-    /// Wraps a <see cref="PipeStream"/> object to read and write .NET CLR objects.
+    /// Wraps a <see cref="PipeStream"/> object
+    /// to read and write .NET CLR objects.
     /// </summary>
-    /// <typeparam name="TRead">Reference type to <b>read</b> from the pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to <b>write</b> to the pipe</typeparam>
+    /// <typeparam name="TRead">
+    /// The reference type to read from the pipe.
+    /// </typeparam>
+    /// <typeparam name="TWrite">
+    /// The reference type to write to the pipe.
+    /// </typeparam>
     public class PipeStreamWrapper<TRead, TWrite>
         where TRead : class
         where TWrite : class
     {
         /// <summary>
-        /// Gets the underlying <c>PipeStream</c> object.
+        /// Gets the underlying <see cref="PipeStream"/> object.
         /// </summary>
         public PipeStream BaseStream { get; private set; }
 
         /// <summary>
-        ///     Gets a value indicating whether the <see cref="BaseStream"/> object is connected or not.
+        /// Gets a value indicating whether the
+        /// <see cref="BaseStream"/> object is connected or not.
         /// </summary>
         /// <returns>
-        ///     <c>true</c> if the <see cref="BaseStream"/> object is connected; otherwise, <c>false</c>.
+        /// <c>true</c> if the <see cref="BaseStream"/>
+        /// object is connected, otherwise <c>false</c>.
         /// </returns>
         public bool IsConnected => BaseStream.IsConnected && _reader.IsConnected;
 
         /// <summary>
-        ///     Gets a value indicating whether the current stream supports read operations.
+        /// Gets a value indicating whether the
+        /// current stream supports read operations.
         /// </summary>
         /// <returns>
-        ///     <c>true</c> if the stream supports read operations; otherwise, <c>false</c>.
+        /// <c>true</c> if the stream supports read
+        /// operations, otherwise <c>false</c>.
         /// </returns>
         public bool CanRead => BaseStream.CanRead;
 
         /// <summary>
-        ///     Gets a value indicating whether the current stream supports write operations.
+        /// Gets a value indicating whether the current
+        /// stream supports write operations.
         /// </summary>
         /// <returns>
-        ///     <c>true</c> if the stream supports write operations; otherwise, <c>false</c>.
+        /// <c>true</c> if the stream supports write
+        /// operation, otherwise <c>false</c>.
         /// </returns>
         public bool CanWrite => BaseStream.CanWrite;
 
@@ -65,9 +82,13 @@ namespace NamedPipeWrapper.IO
         private IExposedLogger _logger;
 
         /// <summary>
-        /// Constructs a new <c>PipeStreamWrapper</c> object that reads from and writes to the given <paramref name="stream"/>.
+        /// Constructs a new <see cref="PipeStreamWrapper{TRead, TWrite}"/>
+        /// object that reads from and writes to the given
+        /// <paramref name="stream"/>.
         /// </summary>
-        /// <param name="stream">Stream to read from and write to</param>
+        /// <param name="stream">
+        /// The stream to read from and write to.
+        /// </param>
         public PipeStreamWrapper(PipeStream stream)
         {
             BaseStream = stream;
@@ -76,11 +97,18 @@ namespace NamedPipeWrapper.IO
         }
 
         /// <summary>
-        /// Reads the next object from the pipe.  This method blocks until an object is sent
-        /// or the pipe is disconnected.
+        /// Reads the next object from the pipe.
         /// </summary>
-        /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
+        /// <remarks>
+        /// This method blocks until an object
+        /// is sent or the pipe is disconnected.
+        /// </remarks>
+        /// </summary>
+        /// <returns>
+        /// The next object read from the pipe, or
+        /// <c>null</c> if the pipe disconnected.
+        /// </returns>
+        /// <exception cref="SerializationException"/>
         public TRead ReadObject()
         {
             LogDebug("ReadObject");
@@ -88,10 +116,15 @@ namespace NamedPipeWrapper.IO
         }
 
         /// <summary>
-        /// Writes an object to the pipe.  This method blocks until all data is sent.
+        /// Writes an object to the pipe.
         /// </summary>
-        /// <param name="obj">Object to write to the pipe</param>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="TRead"/> is not marked as serializable.</exception>
+        /// <remarks>
+        /// This method blocks until all data is sent.
+        /// </remarks>
+        /// <param name="obj">
+        /// Tne object to write to the pipe.
+        /// </param>
+        /// <exception cref="SerializationException"/>
         public void WriteObject(TWrite obj)
         {
             LogDebug("WriteObject");

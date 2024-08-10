@@ -9,14 +9,19 @@ using System.Text;
 namespace NamedPipeWrapper.IO
 {
     /// <summary>
-    /// Wraps a <see cref="PipeStream"/> object and reads from it.  Deserializes binary data sent by a <see cref="PipeStreamWriter{T}"/>
-    /// into a .NET CLR object specified by <typeparamref name="T"/>.
+    /// Wraps a <see cref="PipeStream"/> object and reads from it.
     /// </summary>
-    /// <typeparam name="T">Reference type to deserialize data to</typeparam>
+    /// <remarks>
+    /// Deserializes binary data sent by a <see cref="PipeStreamWriter{T}"/>
+    /// into a .NET CLR object specified by <typeparamref name="T"/>.
+    /// </remarks>
+    /// <typeparam name="T">
+    /// The reference type to deserialize data to.
+    /// </typeparam>
     public class PipeStreamReader<T> where T : class
     {
         /// <summary>
-        /// Gets the underlying <c>PipeStream</c> object.
+        /// Gets the underlying <see cref="PipeStream"/> object.
         /// </summary>
         public PipeStream BaseStream { get; private set; }
 
@@ -28,9 +33,12 @@ namespace NamedPipeWrapper.IO
         private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
         /// <summary>
-        /// Constructs a new <c>PipeStreamReader</c> object that reads data from the given <paramref name="stream"/>.
+        /// Constructs a new <see cref="PipeStreamReader{T}"/> object
+        /// that reads data from the given <paramref name="stream"/>.
         /// </summary>
-        /// <param name="stream">Pipe to read from</param>
+        /// <param name="stream">
+        /// The pipe stream to read from.
+        /// </param>
         public PipeStreamReader(PipeStream stream)
         {
             BaseStream = stream;
@@ -43,8 +51,8 @@ namespace NamedPipeWrapper.IO
         /// Reads the length of the next message (in bytes) from the client.
         /// </summary>
         /// <returns>Number of bytes of data the client will be sending.</returns>
-        /// <exception cref="InvalidOperationException">The pipe is disconnected, waiting to connect, or the handle has not been set.</exception>
-        /// <exception cref="IOException">Any I/O error occurred.</exception>
+        /// <exception cref="InvalidOperationException"/>
+        /// <exception cref="IOException"/>
         private int ReadLength()
         {
             const int lensize = sizeof (int);
@@ -60,7 +68,7 @@ namespace NamedPipeWrapper.IO
                 : IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
         }
 
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
+        /// <exception cref="SerializationException"/>
         private T ReadObject(int len)
         {
             byte[] data = new byte[len];
@@ -74,11 +82,17 @@ namespace NamedPipeWrapper.IO
         #endregion
 
         /// <summary>
-        /// Reads the next object from the pipe.  This method blocks until an object is sent
-        /// or the pipe is disconnected.
+        /// Reads the next object from the pipe.
         /// </summary>
-        /// <returns>The next object read from the pipe, or <c>null</c> if the pipe disconnected.</returns>
-        /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
+        /// <remarks>
+        /// This method blocks until an object is
+        /// sent or the pipe is disconnected.
+        /// </remarks>
+        /// <returns>
+        /// The next object read from the pipe, or
+        /// <c>null</c> if the pipe disconnected.
+        /// </returns>
+        /// <exception cref="SerializationException"/>
         public T ReadObject()
         {
             if (typeof(T) == typeof(string))
