@@ -3,6 +3,8 @@
     <TargetFramework>net48</TargetFramework>
     <IsPackable>false</IsPackable>
     <OutputType>WinExe</OutputType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="2.9.0">
@@ -12,9 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NamedPipeWrapper\NamedPipeWrapper.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
