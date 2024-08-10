@@ -4,21 +4,24 @@ namespace ExampleCLI
 {
     internal static class Program
     {
-        private const string DefaultPipeName = "MyServerPipe";
+        private const string DefaultPipeName = "named_pipe_test_server";
 
         private static void Main(string[] args)
         {
-            if (args.Length >= 1 && string.Equals("/server", args[0], StringComparison.OrdinalIgnoreCase))
+            Console.WriteLine("Named Pipe Client - Example CLI");
+            Console.WriteLine("For help with commands, type \"!help\".");
+            Console.WriteLine("Type \"!exit\" (or press ^C) to exit.");
+            Console.WriteLine();
+
+            if (args.Length >= 1 && args[0].ToLower() == "/server")
             {
-                Console.WriteLine("Running in SERVER mode");
-                Console.WriteLine("Press 'q' to exit");
-                new MyServer(DefaultPipeName);
+                Console.WriteLine("Started in SERVER mode.");
+                new Server(DefaultPipeName);
             }
             else
             {
-                Console.WriteLine("Running in CLIENT mode");
-                Console.WriteLine("Press 'q' to exit");
-                new MyClient(DefaultPipeName);
+                Console.WriteLine("Started in CLIENT mode.");
+                new Client(DefaultPipeName);
             }
         }
     }

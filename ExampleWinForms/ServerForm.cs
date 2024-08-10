@@ -10,7 +10,6 @@ namespace ExampleGUI
         private readonly NamedPipeServer<string> _server = new NamedPipeServer<string>(Constants.PIPE_NAME);
         private readonly ISet<string> _clients = new HashSet<string>();
 
-
         public ServerForm()
         {
             InitializeComponent();
