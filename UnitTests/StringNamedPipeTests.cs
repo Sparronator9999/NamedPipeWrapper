@@ -15,7 +15,7 @@ namespace UnitTests
         private const string PipeName = "test-pipe";
         private const int Timeout = 1000;
 
-        private StringNamedPipeServer _server;
+        private NamedPipeServer<string> _server;
         private NamedPipeClientStream _client;
 
         private ConcurrentQueue<string> _serverMessageQueue;
@@ -37,12 +37,12 @@ namespace UnitTests
         [Test]
         public void ServerShouldReceiveSameMessageClientSent()
         {
-            var message = Guid.NewGuid().ToString();
+            string message = Guid.NewGuid().ToString();
             ClientSendMessage(message);
 
             _serverReceivedMessageEvent.WaitOne(Timeout);
 
-            _serverMessageQueue.TryDequeue(out var messageReceived);
+            _serverMessageQueue.TryDequeue(out string messageReceived);
             messageReceived.Should().Be(message);
         }
 
@@ -50,10 +50,10 @@ namespace UnitTests
         [Test]
         public void ClientShouldReceiveSameMessageServerSent()
         {
-            var message = Guid.NewGuid().ToString();
+            string message = Guid.NewGuid().ToString();
             _server.PushMessage(message);
 
-            var messageReceived = ClientReadMessage();
+            string messageReceived = ClientReadMessage();
 
             messageReceived.Should().Be(message);
         }
@@ -62,7 +62,7 @@ namespace UnitTests
 
         private void StartServer()
         {
-            _server = new StringNamedPipeServer(PipeName);
+            _server = new NamedPipeServer<string>(PipeName);
             _server.ClientMessage += OnClientMessageReceived;
             _server.Start();
         }
@@ -73,7 +73,7 @@ namespace UnitTests
             _client.Connect();
 
             // Read pipe name
-            var pipeName = ClientReadMessage();
+            string pipeName = ClientReadMessage();
             _client.Close();
 
             // Wait for data pipe connection to be created 
@@ -87,14 +87,14 @@ namespace UnitTests
         private string ClientReadMessage()
         {
             const int bufferSize = 1024;
-            var buffer = new byte[bufferSize];
+            byte[] buffer = new byte[bufferSize];
             _client.Read(buffer, 0, bufferSize);
             return Encoding.Unicode.GetString(buffer).TrimEnd('\0');
         }
 
         private void ClientSendMessage(string message)
         {
-            var messageBytes = Encoding.Unicode.GetBytes(message);
+            byte[] messageBytes = Encoding.Unicode.GetBytes(message);
             _client.Write(messageBytes, 0, messageBytes.Length);
             _client.Flush();
         }

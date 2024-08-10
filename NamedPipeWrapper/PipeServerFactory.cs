@@ -2,11 +2,11 @@
 
 namespace NamedPipeWrapper
 {
-    static class PipeServerFactory
+    internal static class PipeServerFactory
     {
         public static NamedPipeServerStream CreateAndConnectPipe(string pipeName)
         {
-            var pipe = CreatePipe(pipeName);
+            NamedPipeServerStream pipe = CreatePipe(pipeName);
             pipe.WaitForConnection();
 
             return pipe;
@@ -20,7 +20,7 @@ namespace NamedPipeWrapper
 
         public static NamedPipeServerStream CreateAndConnectPipe(string pipeName, int bufferSize, PipeSecurity security)
         {
-            var pipe = CreatePipe(pipeName, bufferSize, security);
+            NamedPipeServerStream pipe = CreatePipe(pipeName, bufferSize, security);
             pipe.WaitForConnection();
 
             return pipe;

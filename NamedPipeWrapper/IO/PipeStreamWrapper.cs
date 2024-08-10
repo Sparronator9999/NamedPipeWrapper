@@ -42,10 +42,7 @@ namespace NamedPipeWrapper.IO
         /// <returns>
         ///     <c>true</c> if the <see cref="BaseStream"/> object is connected; otherwise, <c>false</c>.
         /// </returns>
-        public bool IsConnected
-        {
-            get { return BaseStream.IsConnected && _reader.IsConnected; }
-        }
+        public bool IsConnected => BaseStream.IsConnected && _reader.IsConnected;
 
         /// <summary>
         ///     Gets a value indicating whether the current stream supports read operations.
@@ -53,10 +50,7 @@ namespace NamedPipeWrapper.IO
         /// <returns>
         ///     <c>true</c> if the stream supports read operations; otherwise, <c>false</c>.
         /// </returns>
-        public bool CanRead
-        {
-            get { return BaseStream.CanRead; }
-        }
+        public bool CanRead => BaseStream.CanRead;
 
         /// <summary>
         ///     Gets a value indicating whether the current stream supports write operations.
@@ -64,10 +58,7 @@ namespace NamedPipeWrapper.IO
         /// <returns>
         ///     <c>true</c> if the stream supports write operations; otherwise, <c>false</c>.
         /// </returns>
-        public bool CanWrite
-        {
-            get { return BaseStream.CanWrite; }
-        }
+        public bool CanWrite => BaseStream.CanWrite;
 
         private readonly PipeStreamReader<TRead> _reader;
         private readonly PipeStreamWriter<TWrite> _writer;
@@ -135,18 +126,12 @@ namespace NamedPipeWrapper.IO
 
         public void LogDebug(string message)
         {
-            if (_logger != null)
-            {
-                _logger.LogDebug($"NamedPipeWrapper.IO.PipeStreamWrapper: {message}");
-            }
+            _logger?.LogDebug($"NamedPipeWrapper.IO.PipeStreamWrapper: {message}");
         }
 
         public void LogError(Exception exception, string message)
         {
-            if (_logger != null)
-            {
-                _logger.LogError(exception, $"NamedPipeWrapper.IO.PipeStreamWrapper: {message}");
-            }
+            _logger?.LogError(exception, $"NamedPipeWrapper.IO.PipeStreamWrapper: {message}");
         }
     }
 }

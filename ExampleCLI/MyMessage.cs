@@ -3,7 +3,7 @@
 namespace ExampleCLI
 {
     [Serializable]
-    class MyMessage
+    internal class MyMessage
     {
         public int Id;
         public string Text;

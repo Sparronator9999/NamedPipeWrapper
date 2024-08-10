@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using NamedPipeWrapper;
 
@@ -47,9 +42,9 @@ namespace ExampleGUI
         private void AddLine(string html)
         {
             richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
-                }));
+            {
+                richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
+            }));
         }
 
         private void UpdateClientList()
@@ -60,7 +55,7 @@ namespace ExampleGUI
         private void UpdateClientListImpl()
         {
             listBoxClients.Items.Clear();
-            foreach (var client in _clients)
+            foreach (string client in _clients)
             {
                 listBoxClients.Items.Add(client);
             }
@@ -76,7 +71,7 @@ namespace ExampleGUI
             }
             else
             {
-                var clientName = listBoxClients.SelectedItem.ToString();
+                string clientName = listBoxClients.SelectedItem.ToString();
                 _server.PushMessage(textBoxMessage.Text, clientName);
             }
             

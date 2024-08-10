@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using NamedPipeWrapper;
 
@@ -30,25 +24,25 @@ namespace ExampleGUI
         private void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
         {
             richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    AddLine("<b>Server</b>: " + message);
-                }));
+            {
+                AddLine("<b>Server</b>: " + message);
+            }));
         }
 
         private void OnDisconnected(NamedPipeConnection<string, string> connection)
         {
             richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    AddLine("<b>Disconnected from server</b>");
-                }));
+            {
+                AddLine("<b>Disconnected from server</b>");
+            }));
         }
 
         private void AddLine(string html)
         {
             richTextBoxMessages.Invoke(new Action(delegate
-                {
-                    richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
-                }));
+            {
+                richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
+            }));
         }
 
         private void buttonSend_Click(object sender, EventArgs e)

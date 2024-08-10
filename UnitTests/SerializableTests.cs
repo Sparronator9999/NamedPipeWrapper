@@ -15,15 +15,15 @@ using NUnit.Framework;
 namespace UnitTests
 {
     [TestFixture]
-    class SerializableTests
+    internal class SerializableTests
     {
         private static readonly ILog Logger =
             LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         static SerializableTests()
         {
-            var layout = new PatternLayout("%-6timestamp %-5level - %message%newline");
-            var appender = new ConsoleAppender {Layout = layout};
+            PatternLayout layout = new PatternLayout("%-6timestamp %-5level - %message%newline");
+            ConsoleAppender appender = new ConsoleAppender {Layout = layout};
             layout.ActivateOptions();
             appender.ActivateOptions();
             BasicConfigurator.Configure(appender);
@@ -98,7 +98,7 @@ namespace UnitTests
             _client.Stop();
 
             Logger.Debug("Client and server stopped");
-            Logger.DebugFormat("Test took {0}", (DateTime.Now - _startTime));
+            Logger.DebugFormat("Test took {0}", DateTime.Now - _startTime);
             Logger.Debug("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
@@ -123,9 +123,9 @@ namespace UnitTests
         public void TestCircularReferences()
         {
             _expectedData = new TestCollection();
-            for (var i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
-                var item = new TestItem(i, _expectedData, RandomEnum());
+                TestItem item = new TestItem(i, _expectedData, RandomEnum());
                 _expectedData.Add(item);
             }
 
@@ -144,10 +144,10 @@ namespace UnitTests
             Assert.AreEqual(_expectedData.Count, _actualData.Count,
                 string.Format("Collection lengths should be equal"));
 
-            for (var i = 0; i < _actualData.Count; i++)
+            for (int i = 0; i < _actualData.Count; i++)
             {
-                var expectedItem = _expectedData[i];
-                var actualItem = _actualData[i];
+                TestItem expectedItem = _expectedData[i];
+                TestItem actualItem = _actualData[i];
                 Assert.AreEqual(expectedItem, actualItem, string.Format("Items at index {0} should be equal", i));
                 Assert.AreEqual(actualItem.Parent, _actualData,
                     string.Format("Item at index {0}'s Parent property should reference the item's parent collection",
@@ -157,7 +157,7 @@ namespace UnitTests
 
         private TestEnum RandomEnum()
         {
-            var rand = new Random().NextDouble();
+            double rand = new Random().NextDouble();
             if (rand < 0.33)
                 return TestEnum.A;
             if (rand < 0.66)
@@ -169,17 +169,17 @@ namespace UnitTests
     }
 
     [Serializable]
-    class TestCollection : List<TestItem>
+    internal class TestCollection : List<TestItem>
     {
         public override int GetHashCode()
         {
-            var strs = new List<string>(Count);
-            foreach (var item in ToArray())
+            List<string> strs = new List<string>(Count);
+            foreach (TestItem item in ToArray())
             {
                 strs.Add(item.GetHashCode().ToString());
             }
 
-            var str = string.Join(",", strs);
+            string str = string.Join(",", strs);
             return Hash(Encoding.UTF8.GetBytes(str)).GetHashCode();
         }
 
@@ -190,11 +190,11 @@ namespace UnitTests
         /// <returns></returns>
         private static string Hash(byte[] bytes)
         {
-            using (var sha1 = SHA1.Create())
+            using (SHA1 sha1 = SHA1.Create())
             {
-                var hash = sha1.ComputeHash(bytes);
-                var sb = new StringBuilder();
-                for (var i = 0; i < hash.Length; i++)
+                byte[] hash = sha1.ComputeHash(bytes);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hash.Length; i++)
                 {
                     sb.Append(hash[i].ToString("x2"));
                 }
@@ -205,42 +205,48 @@ namespace UnitTests
     }
 
     [Serializable]
-    class TestItem
+    internal class TestItem
     {
-        public readonly int Id;
+        public readonly int ID;
         public readonly TestCollection Parent;
         public readonly TestEnum Enum;
 
         public TestItem(int id, TestCollection parent, TestEnum @enum)
         {
-            Id = id;
+            ID = id;
             Parent = parent;
             Enum = @enum;
         }
 
         protected bool Equals(TestItem other)
         {
-            return Id == other.Id && Enum == other.Enum;
+            return ID == other.ID && Enum == other.Enum;
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((TestItem) obj);
+            if (obj is null)
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            if (obj.GetType() != GetType())
+                return false;
+
+            return Equals((TestItem)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Id * 397) ^ (int) Enum;
+                return (ID * 397) ^ (int)Enum;
             }
         }
     }
 
-    enum TestEnum
+    internal enum TestEnum
     {
         A = 1,
         B = 2,

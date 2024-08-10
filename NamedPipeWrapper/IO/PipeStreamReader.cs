@@ -48,24 +48,24 @@ namespace NamedPipeWrapper.IO
         private int ReadLength()
         {
             const int lensize = sizeof (int);
-            var lenbuf = new byte[lensize];
-            var bytesRead = BaseStream.Read(lenbuf, 0, lensize);
+            byte[] lenbuf = new byte[lensize];
+            int bytesRead = BaseStream.Read(lenbuf, 0, lensize);
             if (bytesRead == 0)
             {
                 IsConnected = false;
                 return 0;
             }
-            if (bytesRead != lensize)
-                throw new IOException(string.Format("Expected {0} bytes but read {1}", lensize, bytesRead));
-            return IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
+            return bytesRead != lensize
+                ? throw new IOException(string.Format("Expected {0} bytes but read {1}", lensize, bytesRead))
+                : IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
         }
 
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private T ReadObject(int len)
         {
-            var data = new byte[len];
+            byte[] data = new byte[len];
             BaseStream.Read(data, 0, len);
-            using (var memoryStream = new MemoryStream(data))
+            using (MemoryStream memoryStream = new MemoryStream(data))
             {
                 return (T) _binaryFormatter.Deserialize(memoryStream);
             }
@@ -85,16 +85,16 @@ namespace NamedPipeWrapper.IO
             {
                 return (T) ReadString();
             }
-            var len = ReadLength();
-            return len == 0 ? default(T) : ReadObject(len);
+            int len = ReadLength();
+            return len == 0 ? default : ReadObject(len);
         }
 
         private object ReadString()
         {
             const int bufferSize = 1024;
-            var data = new byte[bufferSize];
+            byte[] data = new byte[bufferSize];
             BaseStream.Read(data, 0, bufferSize);
-            var message = Encoding.Unicode.GetString(data).TrimEnd('\0');
+            string message = Encoding.Unicode.GetString(data).TrimEnd('\0');
             
             return message.Length > 0 ? message : null;
         }

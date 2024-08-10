@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ExampleCLI
 {
-    class Program
+    internal static class Program
     {
         private const string DefaultPipeName = "MyServerPipe";
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             if (args.Length >= 1 && string.Equals("/server", args[0], StringComparison.OrdinalIgnoreCase))
             {

@@ -1,27 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NamedPipeWrapper;
 
 namespace ExampleCLI
 {
-    class MyClient
+    internal class MyClient
     {
         private bool KeepRunning
         {
             get
             {
-                var key = Console.ReadKey();
-                if (key.Key == ConsoleKey.Q)
-                    return false;
-                return true;
+                ConsoleKeyInfo key = Console.ReadKey();
+                return key.Key != ConsoleKey.Q;
             }
         }
 
         public MyClient(string pipeName)
         {
-            var client = new NamedPipeClient<MyMessage>(pipeName);
+            NamedPipeClient<MyMessage> client = new NamedPipeClient<MyMessage>(pipeName);
             client.ServerMessage += OnServerMessage;
             client.Error += OnError;
             client.Start();

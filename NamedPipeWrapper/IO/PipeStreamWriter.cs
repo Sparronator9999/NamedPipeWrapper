@@ -36,7 +36,7 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="SerializationException">An object in the graph of type parameter <typeparamref name="T"/> is not marked as serializable.</exception>
         private byte[] Serialize(T obj)
         {
-            using (var memoryStream = new MemoryStream())
+            using (MemoryStream memoryStream = new MemoryStream())
             {
                 _binaryFormatter.Serialize(memoryStream, obj);
                 return memoryStream.ToArray();
@@ -45,7 +45,7 @@ namespace NamedPipeWrapper.IO
 
         private void WriteLength(int len)
         {
-            var lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
+            byte[] lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
             BaseStream.Write(lenbuf, 0, lenbuf.Length);
         }
 

@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
@@ -12,15 +11,15 @@ using log4net.Layout;
 namespace UnitTests
 {
     [TestFixture]
-    class DataTests
+    internal class DataTests
     {
         private static readonly log4net.ILog Logger =
             log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         static DataTests()
         {
-            var layout = new PatternLayout("%-6timestamp %-5level - %message%newline");
-            var appender = new ConsoleAppender { Layout = layout };
+            PatternLayout layout = new PatternLayout("%-6timestamp %-5level - %message%newline");
+            ConsoleAppender appender = new ConsoleAppender { Layout = layout };
             layout.ActivateOptions();
             appender.ActivateOptions();
             BasicConfigurator.Configure(appender);
@@ -31,9 +30,7 @@ namespace UnitTests
         private NamedPipeServer<byte[]> _server;
         private NamedPipeClient<byte[]> _client;
 
-        private byte[] _expectedData;
         private string _expectedHash;
-        private byte[] _actualData;
         private string _actualHash;
         private bool _clientDisconnected;
 
@@ -53,9 +50,7 @@ namespace UnitTests
             _server = new NamedPipeServer<byte[]>(PipeName);
             _client = new NamedPipeClient<byte[]>(PipeName);
 
-            _expectedData = null;
             _expectedHash = null;
-            _actualData = null;
             _actualHash = null;
             _clientDisconnected = false;
 
@@ -103,7 +98,7 @@ namespace UnitTests
             _client.Error -= ClientOnError;
 
             Logger.Debug("Client and server stopped");
-            Logger.DebugFormat("Test took {0}", (DateTime.Now - _startTime));
+            Logger.DebugFormat("Test took {0}", DateTime.Now - _startTime);
             Logger.Debug("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
@@ -121,7 +116,6 @@ namespace UnitTests
         private void ServerOnClientMessage(NamedPipeConnection<byte[], byte[]> connection, byte[] message)
         {
             Logger.DebugFormat("Received {0} bytes from the client", message.Length);
-            _actualData = message;
             _actualHash = Hash(message);
             _barrier.Set();
         }
@@ -332,12 +326,11 @@ namespace UnitTests
             Logger.DebugFormat("Generating {0} bytes of random data...", numBytes);
 
             // Generate some random data and compute its SHA-1 hash
-            var data = new byte[numBytes];
+            byte[] data = new byte[numBytes];
             new Random().NextBytes(data);
 
             Logger.DebugFormat("Computing SHA-1 hash for {0} bytes of data...", numBytes);
 
-            _expectedData = data;
             _expectedHash = Hash(data);
 
             Logger.DebugFormat("Sending {0} bytes of data to the client...", numBytes);
@@ -354,11 +347,11 @@ namespace UnitTests
         /// <returns></returns>
         private static string Hash(byte[] bytes)
         {
-            using (var sha1 = System.Security.Cryptography.SHA1.Create())
+            using (SHA1 sha1 = SHA1.Create())
             {
-                var hash = sha1.ComputeHash(bytes);
-                var sb = new StringBuilder();
-                for (var i = 0; i < hash.Length; i++)
+                byte[] hash = sha1.ComputeHash(bytes);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hash.Length; i++)
                 {
                     sb.Append(hash[i].ToString("x2"));
                 }

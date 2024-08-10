@@ -21,7 +21,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Gets the connection's unique identifier.
         /// </summary>
-        public readonly int Id;
+        public readonly int ID;
 
         /// <summary>
         /// Gets the connection's name.
@@ -36,7 +36,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
-        public bool IsConnected { get { return _streamWrapper.IsConnected; } }
+        public bool IsConnected => _streamWrapper.IsConnected;
 
         /// <summary>
         /// Invoked when the named pipe connection terminates.
@@ -62,7 +62,7 @@ namespace NamedPipeWrapper
 
         internal NamedPipeConnection(int id, string name, PipeStream serverStream)
         {
-            Id = id;
+            ID = id;
             Name = name;
             Handle = serverStream.SafePipeHandle;
             _streamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
@@ -74,12 +74,12 @@ namespace NamedPipeWrapper
         /// </summary>
         public void Open()
         {
-            var readWorker = new Worker();
+            Worker readWorker = new Worker();
             readWorker.Succeeded += OnSucceeded;
             readWorker.Error += OnError;
             readWorker.DoWork(ReadPipe);
 
-            var writeWorker = new Worker();
+            Worker writeWorker = new Worker();
             writeWorker.Succeeded += OnSucceeded;
             writeWorker.Error += OnError;
             writeWorker.DoWork(WritePipe);
@@ -125,8 +125,7 @@ namespace NamedPipeWrapper
 
             _notifiedSucceeded = true;
 
-            if (Disconnected != null)
-                Disconnected(this);
+            Disconnected?.Invoke(this);
         }
 
         /// <summary>
@@ -135,8 +134,7 @@ namespace NamedPipeWrapper
         /// <param name="exception"></param>
         private void OnError(Exception exception)
         {
-            if (Error != null)
-                Error(this, exception);
+            Error?.Invoke(this, exception);
         }
 
         /// <summary>
@@ -147,14 +145,13 @@ namespace NamedPipeWrapper
         {
             while (IsConnected && _streamWrapper.CanRead)
             {
-                var obj = _streamWrapper.ReadObject();
+                TRead obj = _streamWrapper.ReadObject();
                 if (obj == null)
                 {
                     CloseImpl();
                     return;
                 }
-                if (ReceiveMessage != null)
-                    ReceiveMessage(this, obj);
+                ReceiveMessage?.Invoke(this, obj);
             }
         }
 
@@ -176,7 +173,7 @@ namespace NamedPipeWrapper
         }
     }
 
-    static class ConnectionFactory
+    internal static class ConnectionFactory
     {
         private static int _lastId;
 

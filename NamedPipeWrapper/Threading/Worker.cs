@@ -5,20 +5,15 @@ using Twosense.WindowsService.ExposedInterfaces;
 
 namespace NamedPipeWrapper.Threading
 {
-    class Worker
+    internal class Worker
     {
         private readonly TaskScheduler _callbackThread;
         private IExposedLogger _logger;
 
-        private static TaskScheduler CurrentTaskScheduler
-        {
-            get
-            {
-                return (SynchronizationContext.Current != null
-                            ? TaskScheduler.FromCurrentSynchronizationContext()
-                            : TaskScheduler.Default);
-            }
-        }
+        private static TaskScheduler CurrentTaskScheduler =>
+            SynchronizationContext.Current != null
+                ? TaskScheduler.FromCurrentSynchronizationContext()
+                : TaskScheduler.Default;
 
         public event WorkerSucceededEventHandler Succeeded;
         public event WorkerExceptionEventHandler Error;
@@ -41,7 +36,7 @@ namespace NamedPipeWrapper.Threading
 
         private void DoWorkImpl(object oAction)
         {
-            var action = (Action) oAction;
+            Action action = (Action) oAction;
             try
             {
                 action();
@@ -56,8 +51,7 @@ namespace NamedPipeWrapper.Threading
         private void Succeed()
         {
             LogDebug("Succeed");
-            if (Succeeded != null)
-                Succeeded();
+            Succeeded?.Invoke();
         }
 
         private void Fail(Exception exception)
@@ -81,18 +75,12 @@ namespace NamedPipeWrapper.Threading
 
         public void LogDebug(string message)
         {
-            if (_logger != null)
-            {
-                _logger.LogDebug($"NamedPipeWrapper.Threading.Worker: {message}");
-            }
+            _logger?.LogDebug($"NamedPipeWrapper.Threading.Worker: {message}");
         }
 
         public void LogError(Exception exception, string message)
         {
-            if (_logger != null)
-            {
-                _logger.LogError(exception, $"NamedPipeWrapper.Threading.Worker: {message}");
-            }
+            _logger?.LogError(exception, $"NamedPipeWrapper.Threading.Worker: {message}");
         }
     }
 
