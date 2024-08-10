@@ -3,9 +3,9 @@ using System.Windows.Forms;
 
 namespace ExampleGUI
 {
-    public partial class FormMain : Form
+    public partial class MainForm : Form
     {
-        public FormMain()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -13,14 +13,14 @@ namespace ExampleGUI
         private void buttonClient_Click(object sender, EventArgs e)
         {
             Hide();
-            new FormClient().ShowDialog(this);
+            new ClientForm().ShowDialog(this);
             Close();
         }
 
         private void buttonServer_Click(object sender, EventArgs e)
         {
             Hide();
-            new FormServer().ShowDialog(this);
+            new ServerForm().ShowDialog(this);
             Close();
         }
     }

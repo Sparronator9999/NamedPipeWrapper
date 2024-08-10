@@ -4,11 +4,11 @@ using NamedPipeWrapper;
 
 namespace ExampleGUI
 {
-    public partial class FormClient : Form
+    public partial class ClientForm : Form
     {
         private readonly NamedPipeClient<string> _client = new NamedPipeClient<string>(Constants.PIPE_NAME);
 
-        public FormClient()
+        public ClientForm()
         {
             InitializeComponent();
             Load += OnLoad;
@@ -23,35 +23,35 @@ namespace ExampleGUI
 
         private void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
         {
-            richTextBoxMessages.Invoke(new Action(delegate
+            txtMessages.Invoke(new Action(delegate
             {
-                AddLine("<b>Server</b>: " + message);
+                AddLine($"<Server> {message}");
             }));
         }
 
         private void OnDisconnected(NamedPipeConnection<string, string> connection)
         {
-            richTextBoxMessages.Invoke(new Action(delegate
+            txtMessages.Invoke(new Action(delegate
             {
-                AddLine("<b>Disconnected from server</b>");
+                AddLine("Disconnected from server");
             }));
         }
 
-        private void AddLine(string html)
+        private void AddLine(string text)
         {
-            richTextBoxMessages.Invoke(new Action(delegate
+            txtMessages.Invoke(new Action(delegate
             {
-                richTextBoxMessages.Text += Environment.NewLine + "<div>" + html + "</div>";
+                txtMessages.Text += text + Environment.NewLine;
             }));
         }
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(textBoxMessage.Text))
+            if (string.IsNullOrWhiteSpace(txtMessage.Text))
                 return;
 
-            _client.PushMessage(textBoxMessage.Text);
-            textBoxMessage.Text = "";
+            _client.PushMessage(txtMessage.Text);
+            txtMessage.Text = "";
         }
     }
 }
