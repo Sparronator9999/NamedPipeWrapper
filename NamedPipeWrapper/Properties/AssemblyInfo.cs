@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Named Pipe Wrapper library")]
 [assembly: AssemblyDescription("A simple, easy to use, strongly-typed wrapper around .NET named pipes.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("acdvorak, reliablehosting, twosense, Sparronator9999")]
 [assembly: AssemblyProduct("NamedPipeWrapper")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCopyright("Copyright © Andrew C. Dvorak and Contributors 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
