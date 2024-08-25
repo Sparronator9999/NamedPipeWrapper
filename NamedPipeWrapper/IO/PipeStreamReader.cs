@@ -64,7 +64,7 @@ namespace NamedPipeWrapper.IO
                 return 0;
             }
             return bytesRead != lensize
-                ? throw new IOException(string.Format("Expected {0} bytes but read {1}", lensize, bytesRead))
+                ? throw new IOException($"Expected {lensize} bytes but read {bytesRead}")
                 : IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
         }
 

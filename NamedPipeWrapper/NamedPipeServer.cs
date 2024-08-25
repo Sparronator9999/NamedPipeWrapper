@@ -8,36 +8,44 @@ using NamedPipeWrapper.Threading;
 namespace NamedPipeWrapper
 {
     /// <summary>
-    /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
+    /// Wraps a <see cref="NamedPipeServerStream"/> and provides
+    /// multiple simultaneous client connection handling.
     /// </summary>
-    /// <typeparam name="TReadWrite">Reference type to read from and write to the named pipe</typeparam>
-    public class NamedPipeServer<TReadWrite> : NamedPipeServer<TReadWrite, TReadWrite> where TReadWrite : class
+    /// <typeparam name="TReadWrite">
+    /// The reference type to read from and write to the named pipe.
+    /// </typeparam>
+    public class NamedPipeServer<TReadWrite> : NamedPipeServer<TReadWrite, TReadWrite>
+        where TReadWrite : class
     {
         /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// Constructs a new <see cref="NamedPipeServer{TReadWrite}"/>
+        /// object that listens for client connections on the given
+        /// <paramref name="pipeName"/>.
         /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
+        /// <inheritdoc cref="NamedPipeServer{TRead, TWrite}(string)"/>
         public NamedPipeServer(string pipeName)
-            : base(pipeName)
-        {
-        }
+            : base(pipeName) { }
 
         /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// Constructs a new <see cref="NamedPipeServer{TReadWrite}"/>
+        /// object that listens for client connections on the given
+        /// <paramref name="pipeName"/>.
         /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
-        /// <param name="bufferSize">Size of input and output buffer</param>
-        /// <param name="security">And object that determine the access control and audit security for the pipe</param>
+        /// <inheritdoc cref="NamedPipeServer{TRead, TWrite}(string, int, PipeSecurity)"/>
         public NamedPipeServer(string pipeName, int bufferSize, PipeSecurity security)
-            : base(pipeName, bufferSize, security)
-        { }
+            : base(pipeName, bufferSize, security) { }
     }
 
     /// <summary>
-    /// Wraps a <see cref="NamedPipeServerStream"/> and provides multiple simultaneous client connection handling.
+    /// Wraps a <see cref="NamedPipeServerStream"/> and provides
+    /// multiple simultaneous client connection handling.
     /// </summary>
-    /// <typeparam name="TRead">Reference type to read from the named pipe</typeparam>
-    /// <typeparam name="TWrite">Reference type to write to the named pipe</typeparam>
+    /// <typeparam name="TRead">
+    /// The reference type to read from the named pipe.
+    /// </typeparam>
+    /// <typeparam name="TWrite">
+    /// The reference type to write to the named pipe.
+    /// </typeparam>
     public class NamedPipeServer<TRead, TWrite>
         where TRead : class
         where TWrite : class
@@ -58,7 +66,8 @@ namespace NamedPipeWrapper
         public event ConnectionMessageEventHandler<TRead, TWrite> ClientMessage;
 
         /// <summary>
-        /// Invoked whenever an exception is thrown during a read or write operation.
+        /// Invoked whenever an exception is thrown
+        /// during a read or write operation.
         /// </summary>
         public event PipeExceptionEventHandler Error;
 
@@ -72,20 +81,26 @@ namespace NamedPipeWrapper
         private volatile bool _shouldKeepRunning;
 
         /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
+        /// Constructs a new <see cref="NamedPipeServer{TRead, TWrite}"/>
+        /// object that listens for client connections on the given
+        /// <paramref name="pipeName"/>.
         /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
+        /// <param name="pipeName">
+        /// The name of the pipe to listen on.
+        /// </param>
         public NamedPipeServer(string pipeName)
         {
             _pipeName = pipeName;
         }
 
-        /// <summary>
-        /// Constructs a new <c>NamedPipeServer</c> object that listens for client connections on the given <paramref name="pipeName"/>.
-        /// </summary>
-        /// <param name="pipeName">Name of the pipe to listen on</param>
-        /// <param name="bufferSize">Size of input and output buffer</param>
-        /// <param name="security">And object that determine the access control and audit security for the pipe</param>
+        /// <param name="bufferSize">
+        /// The size of the input and output buffer.
+        /// </param>
+        /// <param name="security">
+        /// An object that determine the access control
+        /// and audit security for the pipe.
+        /// </param>
+        /// <inheritdoc cref="NamedPipeServer{TRead, TWrite}(string)"/>
         public NamedPipeServer(string pipeName, int bufferSize, PipeSecurity security)
         {
             _pipeName = pipeName;
@@ -94,9 +109,12 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
-        /// Begins listening for client connections in a separate background thread.
-        /// This method returns immediately.
+        /// Begins listening for client connections
+        /// in a separate background thread.
         /// </summary>
+        /// <remarks>
+        /// This method returns immediately.
+        /// </remarks>
         public void Start()
         {
             _shouldKeepRunning = true;
@@ -107,8 +125,11 @@ namespace NamedPipeWrapper
 
         /// <summary>
         /// Sends a message to all connected clients asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
+        /// <remarks>
+        /// This method returns immediately, possibly before
+        /// the message has been sent to all clients.
+        /// </remarks>
         /// <param name="message"></param>
         public void PushMessage(TWrite message)
         {
@@ -123,10 +144,15 @@ namespace NamedPipeWrapper
 
         /// <summary>
         /// Sends a message to a specific client asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
+        /// <remarks>
+        /// This method returns immediately, possibly before
+        /// the message has been sent to all clients.
+        /// </remarks>
         /// <param name="message"></param>
-        /// <param name="targetId">Specific client ID to send to.</param>
+        /// <param name="targetId">
+        /// Specific client ID to send to.
+        /// </param>
         public void PushMessage(TWrite message, int targetId)
         {
             lock (_connections)
@@ -145,10 +171,15 @@ namespace NamedPipeWrapper
 
         /// <summary>
         /// Sends a message to a specific clients asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
+        /// <remarks>
+        /// This method returns immediately, possibly before
+        /// the message has been sent to all clients.
+        /// </remarks>
         /// <param name="message"></param>
-        /// <param name="targetIds">A list of client ID's to send to.</param>
+        /// <param name="targetIds">
+        /// A list of client ID's to send to.
+        /// </param>
         public void PushMessage(TWrite message, List<int> targetIds)
         {
             lock (_connections)
@@ -167,10 +198,15 @@ namespace NamedPipeWrapper
 
         /// <summary>
         /// Sends a message to a specific clients asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
+        /// <remarks>
+        /// This method returns immediately, possibly before
+        /// the message has been sent to all clients.
+        /// </remarks>
         /// <param name="message"></param>
-        /// <param name="targetIds">An array of client ID's to send to.</param>
+        /// <param name="targetIds">
+        /// An array of client ID's to send to.
+        /// </param>
         public void PushMessage(TWrite message, int[] targetIds)
         {
             PushMessage(message, targetIds.ToList());
@@ -178,10 +214,15 @@ namespace NamedPipeWrapper
 
         /// <summary>
         /// Sends a message to a specific client asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
         /// </summary>
+        /// <remarks>
+        /// This method returns immediately, possibly before
+        /// the message has been sent to all clients.
+        /// </remarks>
         /// <param name="message"></param>
-        /// <param name="targetName">Specific client name to send to.</param>
+        /// <param name="targetName">
+        /// Specific client name to send to.
+        /// </param>
         public void PushMessage(TWrite message, string targetName)
         {
             lock (_connections)
@@ -199,10 +240,13 @@ namespace NamedPipeWrapper
         }
         /// <summary>
         /// Sends a message to a specific client asynchronously.
-        /// This method returns immediately, possibly before the message has been sent to all clients.
+        /// This method returns immediately, possibly before
+        /// the message has been sent to all clients.
         /// </summary>
         /// <param name="message"></param>
-        /// <param name="targetNames">A list of client names to send to.</param>
+        /// <param name="targetNames">
+        /// A list of client names to send to.
+        /// </param>
         public void PushMessage(TWrite message, List<string> targetNames)
         {
             lock (_connections)
@@ -246,7 +290,10 @@ namespace NamedPipeWrapper
 
         private void ListenSync()
         {
-            while (_shouldKeepRunning) { WaitForConnection(); }
+            while (_shouldKeepRunning)
+            {
+                WaitForConnection();
+            }
         }
 
         private void WaitForConnection()
@@ -288,7 +335,7 @@ namespace NamedPipeWrapper
             // Catch the IOException that is raised if the pipe is broken or disconnected.
             catch (Exception e)
             {
-                Console.Error.WriteLine("Named pipe is broken or disconnected: {0}", e);
+                Console.Error.WriteLine($"Named pipe is broken or disconnected: {e}");
 
                 Cleanup(handshakePipe);
                 Cleanup(dataPipe);
@@ -324,7 +371,9 @@ namespace NamedPipeWrapper
         private void ClientOnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
         {
             if (connection == null)
+            {
                 return;
+            }
 
             lock (_connections)
             {
@@ -353,7 +402,7 @@ namespace NamedPipeWrapper
 
         private string GetNextConnectionPipeName()
         {
-            return string.Format("{0}_{1}", _pipeName, ++_nextPipeId);
+            return $"{_pipeName}_{++_nextPipeId}";
         }
 
         private static void Cleanup(NamedPipeServerStream pipe)

@@ -43,7 +43,7 @@ namespace NamedPipeWrapper
 
         public static NamedPipeClientStream CreateAndConnectPipe(string pipeName, int timeout = 10)
         {
-            string normalizedPath = Path.GetFullPath(string.Format(@"\\.\pipe\{0}", pipeName));
+            string normalizedPath = Path.GetFullPath($"\\\\.\\pipe\\{pipeName}");
             while (!NamedPipeExists(normalizedPath))
             {
                 Thread.Sleep(timeout);

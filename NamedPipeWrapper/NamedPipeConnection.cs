@@ -193,7 +193,7 @@ namespace NamedPipeWrapper
             where TRead : class
             where TWrite : class
         {
-            return new NamedPipeConnection<TRead, TWrite>(++_lastId, "Client " + _lastId, pipeStream);
+            return new NamedPipeConnection<TRead, TWrite>(++_lastId, $"Client {_lastId}", pipeStream);
         }
     }
 

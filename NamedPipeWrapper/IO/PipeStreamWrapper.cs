@@ -22,9 +22,8 @@ namespace NamedPipeWrapper.IO
         /// <param name="stream">
         /// The pipe stream to read from and write to.
         /// </param>
-        public PipeStreamWrapper(PipeStream stream) : base(stream)
-        {
-        }
+        public PipeStreamWrapper(PipeStream stream)
+            : base(stream) { }
     }
 
     /// <summary>
@@ -108,7 +107,6 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="SerializationException"/>
         public TRead ReadObject()
         {
-            //LogDebug("ReadObject");
             return _reader.ReadObject();
         }
 
@@ -145,7 +143,9 @@ namespace NamedPipeWrapper.IO
         }
 
         /// <summary>
-        /// Closes the current stream and releases any resources (such as sockets and file handles) associated with the current stream.
+        /// Closes the current stream and releases any
+        /// resources (such as sockets and file handles)
+        /// associated with the current stream.
         /// </summary>
         public void Close()
         {
