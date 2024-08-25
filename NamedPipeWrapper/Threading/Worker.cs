@@ -16,9 +16,7 @@ namespace NamedPipeWrapper.Threading
         public event WorkerSucceededEventHandler Succeeded;
         public event WorkerExceptionEventHandler Error;
 
-        public Worker() : this(CurrentTaskScheduler)
-        {
-        }
+        public Worker() : this(CurrentTaskScheduler) { }
 
         public Worker(TaskScheduler callbackThread)
         {

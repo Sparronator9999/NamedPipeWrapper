@@ -12,7 +12,7 @@ namespace NamedPipeWrapper.IO
     /// <typeparam name="TReadWrite">
     /// The reference type to read from and write to the pipe.
     /// </typeparam>
-    public class PipeStreamWrapper<TReadWrite> : PipeStreamWrapper<TReadWrite, TReadWrite>
+    internal class PipeStreamWrapper<TReadWrite> : PipeStreamWrapper<TReadWrite, TReadWrite>
         where TReadWrite : class
     {
         /// <summary>
@@ -36,7 +36,7 @@ namespace NamedPipeWrapper.IO
     /// <typeparam name="TWrite">
     /// The reference type to write to the pipe.
     /// </typeparam>
-    public class PipeStreamWrapper<TRead, TWrite>
+    internal class PipeStreamWrapper<TRead, TWrite>
         where TRead : class
         where TWrite : class
     {

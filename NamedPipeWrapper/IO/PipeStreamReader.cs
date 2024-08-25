@@ -18,7 +18,7 @@ namespace NamedPipeWrapper.IO
     /// <typeparam name="T">
     /// The reference type to deserialize data to.
     /// </typeparam>
-    public class PipeStreamReader<T> where T : class
+    internal class PipeStreamReader<T> where T : class
     {
         /// <summary>
         /// Gets the underlying <see cref="PipeStream"/> object.

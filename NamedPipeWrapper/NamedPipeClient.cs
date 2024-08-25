@@ -139,9 +139,9 @@ namespace NamedPipeWrapper
         /// Blocks the current thread until a connection
         /// to the named pipe server is established.
         /// </summary>
-        public void WaitForConnection()
+        public bool WaitForConnection()
         {
-            _connected.WaitOne();
+            return _connected.WaitOne();
         }
 
         /// <summary>
@@ -174,18 +174,18 @@ namespace NamedPipeWrapper
         /// <c>true</c> if the server connection was established
         /// before the timeout, otherwise <c>false</c>.
         /// </returns>
-        public void WaitForConnection(TimeSpan timeout)
+        public bool WaitForConnection(TimeSpan timeout)
         {
-            _connected.WaitOne(timeout);
+            return _connected.WaitOne(timeout);
         }
 
         /// <summary>
         /// Blocks the current thread until the client
         /// disconnects from the named pipe server.
         /// </summary>
-        public void WaitForDisconnection()
+        public bool WaitForDisconnection()
         {
-            _disconnected.WaitOne();
+           return _disconnected.WaitOne();
         }
 
         /// <summary>
@@ -200,9 +200,9 @@ namespace NamedPipeWrapper
         /// <c>true</c> if the client disconnected
         /// before the timeout, otherwise <c>false</c>.
         /// </returns>
-        public void WaitForDisconnection(int timeout)
+        public bool WaitForDisconnection(int timeout)
         {
-            _disconnected.WaitOne(timeout);
+            return _disconnected.WaitOne(timeout);
         }
 
         /// <summary>
@@ -218,9 +218,9 @@ namespace NamedPipeWrapper
         /// <c>true</c> if the client disconnected
         /// before the timeout, otherwise <c>false</c>.
         /// </returns>
-        public void WaitForDisconnection(TimeSpan timeout)
+        public bool WaitForDisconnection(TimeSpan timeout)
         {
-            _disconnected.WaitOne(timeout);
+            return _disconnected.WaitOne(timeout);
         }
 
         #endregion

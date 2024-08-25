@@ -79,7 +79,7 @@ namespace NamedPipeWrapper
         /// <remarks>
         /// This method returns immediately.
         /// </remarks>
-        public void Open()
+        internal void Open()
         {
             Worker readWorker = new Worker();
             readWorker.Succeeded += OnSucceeded;
@@ -112,15 +112,10 @@ namespace NamedPipeWrapper
         /// Closes the named pipe connection and
         /// underlying <see cref="PipeStream"/>.
         /// </summary>
-        public void Close()
-        {
-            CloseImpl();
-        }
-
-        /// <summary>
+        /// <remarks>
         /// Invoked on the background thread.
-        /// </summary>
-        private void CloseImpl()
+        /// </remarks>
+        internal void Close()
         {
             _streamWrapper.Close();
             _writeSignal.Set();
@@ -160,7 +155,7 @@ namespace NamedPipeWrapper
                 TRead obj = _streamWrapper.ReadObject();
                 if (obj == null)
                 {
-                    CloseImpl();
+                    Close();
                     return;
                 }
                 ReceiveMessage?.Invoke(this, obj);

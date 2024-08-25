@@ -31,9 +31,9 @@ namespace NamedPipeWrapper
         /// object that listens for client connections on the given
         /// <paramref name="pipeName"/>.
         /// </summary>
-        /// <inheritdoc cref="NamedPipeServer{TRead, TWrite}(string, int, PipeSecurity)"/>
-        public NamedPipeServer(string pipeName, int bufferSize, PipeSecurity security)
-            : base(pipeName, bufferSize, security) { }
+        /// <inheritdoc cref="NamedPipeServer{TRead, TWrite}(string, PipeSecurity, int)"/>
+        public NamedPipeServer(string pipeName, PipeSecurity security, int bufferSize = 0)
+            : base(pipeName, security, bufferSize) { }
     }
 
     /// <summary>
@@ -93,19 +93,20 @@ namespace NamedPipeWrapper
             _pipeName = pipeName;
         }
 
-        /// <param name="bufferSize">
-        /// The size of the input and output buffer.
-        /// </param>
         /// <param name="security">
         /// An object that determine the access control
         /// and audit security for the pipe.
         /// </param>
+        /// <param name="bufferSize">
+        /// <para>The size of the input and output buffer.</para>
+        /// <para>Use <c>0</c> for the default buffer size.</para>
+        /// </param>
         /// <inheritdoc cref="NamedPipeServer{TRead, TWrite}(string)"/>
-        public NamedPipeServer(string pipeName, int bufferSize, PipeSecurity security)
+        public NamedPipeServer(string pipeName, PipeSecurity security, int bufferSize = 0)
         {
             _pipeName = pipeName;
-            _bufferSize = bufferSize;
             _security = security;
+            _bufferSize = bufferSize;
         }
 
         /// <summary>
@@ -130,7 +131,9 @@ namespace NamedPipeWrapper
         /// This method returns immediately, possibly before
         /// the message has been sent to all clients.
         /// </remarks>
-        /// <param name="message"></param>
+        /// <param name="message">
+        /// The message to send to the clients.
+        /// </param>
         public void PushMessage(TWrite message)
         {
             lock (_connections)
@@ -143,16 +146,15 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
-        /// Sends a message to a specific client asynchronously.
+        /// Sends a message to a specified client asynchronously.
         /// </summary>
-        /// <remarks>
-        /// This method returns immediately, possibly before
-        /// the message has been sent to all clients.
-        /// </remarks>
-        /// <param name="message"></param>
-        /// <param name="targetId">
-        /// Specific client ID to send to.
+        /// <param name="message">
+        /// The message to send to the client.
         /// </param>
+        /// <param name="targetId">
+        /// The client ID to send the message to.
+        /// </param>
+        /// <inheritdoc cref="PushMessage(TWrite)"/>
         public void PushMessage(TWrite message, int targetId)
         {
             lock (_connections)
@@ -170,16 +172,21 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
-        /// Sends a message to a specific clients asynchronously.
+        /// Sends a message to the specified clients asynchronously.
         /// </summary>
-        /// <remarks>
-        /// This method returns immediately, possibly before
-        /// the message has been sent to all clients.
-        /// </remarks>
-        /// <param name="message"></param>
         /// <param name="targetIds">
-        /// A list of client ID's to send to.
+        /// An array of client IDs to send the message to.
         /// </param>
+        /// <inheritdoc cref="PushMessage(TWrite)"/>
+        public void PushMessage(TWrite message, int[] targetIds)
+        {
+            PushMessage(message, targetIds.ToList());
+        }
+
+        /// <param name="targetIds">
+        /// A list of client IDs to send the message to.
+        /// </param>
+        /// <inheritdoc cref="PushMessage(TWrite, int[])"/>
         public void PushMessage(TWrite message, List<int> targetIds)
         {
             lock (_connections)
@@ -195,34 +202,10 @@ namespace NamedPipeWrapper
             }
         }
 
-
-        /// <summary>
-        /// Sends a message to a specific clients asynchronously.
-        /// </summary>
-        /// <remarks>
-        /// This method returns immediately, possibly before
-        /// the message has been sent to all clients.
-        /// </remarks>
-        /// <param name="message"></param>
-        /// <param name="targetIds">
-        /// An array of client ID's to send to.
-        /// </param>
-        public void PushMessage(TWrite message, int[] targetIds)
-        {
-            PushMessage(message, targetIds.ToList());
-        }
-
-        /// <summary>
-        /// Sends a message to a specific client asynchronously.
-        /// </summary>
-        /// <remarks>
-        /// This method returns immediately, possibly before
-        /// the message has been sent to all clients.
-        /// </remarks>
-        /// <param name="message"></param>
         /// <param name="targetName">
-        /// Specific client name to send to.
+        /// The client name to send the message to.
         /// </param>
+        /// <inheritdoc cref="PushMessage(TWrite, int)"/>
         public void PushMessage(TWrite message, string targetName)
         {
             lock (_connections)
@@ -238,15 +221,11 @@ namespace NamedPipeWrapper
                 }
             }
         }
-        /// <summary>
-        /// Sends a message to a specific client asynchronously.
-        /// This method returns immediately, possibly before
-        /// the message has been sent to all clients.
-        /// </summary>
-        /// <param name="message"></param>
+
         /// <param name="targetNames">
-        /// A list of client names to send to.
+        /// A list of client names to send the message to.
         /// </param>
+        /// <inheritdoc cref="PushMessage(TWrite, List{int})"/>
         public void PushMessage(TWrite message, List<string> targetNames)
         {
             lock (_connections)
@@ -260,7 +239,6 @@ namespace NamedPipeWrapper
                 }
             }
         }
-
 
         /// <summary>
         /// Closes all open client connections and stops listening for new ones.

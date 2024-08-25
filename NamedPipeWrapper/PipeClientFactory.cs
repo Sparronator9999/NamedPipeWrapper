@@ -13,7 +13,7 @@ namespace NamedPipeWrapper
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool WaitNamedPipe(string name, int timeout);
 
-        public static bool NamedPipeExists(string pipeName)
+        private static bool NamedPipeExists(string pipeName)
         {
             try
             {
