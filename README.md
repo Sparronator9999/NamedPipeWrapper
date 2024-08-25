@@ -15,6 +15,33 @@ Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/)
 - Messages are sent and received asynchronously on a separate background thread and marshalled back to the calling thread (typically the UI).
 - Supports large messages - up to 300 MiB.
 
+### Changes from upstream
+
+These changes will be added to the changelog of an upcoming release.
+
+#### This fork
+
+- Upgrade to .NET Framework 4.8 (.NET support coming soon)
+- Remove unused NuGet packages
+- Updated examples
+- Improved example GUI and CLI:
+  - The CLI can now send messages to the server/other clients
+  - Make GUI and CLI apps compatible with each other
+  - Rename ExampleGUI to ExampleWinForms to prepare for a WPF version
+- Better code documentation
+
+#### From [twosense's fork](https://github.com/twosense/named-pipe-wrapper):
+
+- Added string read/write object
+- Performed some code cleanup
+- Updated to SDK-style projects
+- Several other under-the-hood changes
+
+#### From [reliablehosting's fork](https://github.com/reliablehosting/named-pipe-wrapper):
+
+- Send messages to specific client(s), by name or ID
+- Optimised CPU usage while attempting to connect to a named pipe
+
 ## Requirements
 
 Requires .NET Framework 4.8, but may work on older .NET.
@@ -79,6 +106,6 @@ client.ServerMessage += delegate(NamedPipeConnection<MyMessage> conn, MyMessage 
 client.Start();
 ```
 
-## MIT License
+## License
 
 Named Pipe Wrapper for .NET is licensed under the [MIT license](LICENSE.txt).
