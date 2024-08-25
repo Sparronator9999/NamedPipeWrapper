@@ -1,10 +1,10 @@
-﻿using System;
+﻿using NamedPipeWrapper;
+using System;
 using System.Windows.Forms;
-using NamedPipeWrapper;
 
 namespace ExampleGUI
 {
-    public partial class ClientForm : Form
+    internal partial class ClientForm : Form
     {
         private readonly NamedPipeClient<string> _client = new NamedPipeClient<string>(Constants.PIPE_NAME);
 

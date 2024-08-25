@@ -1,16 +1,20 @@
-﻿using System;
+﻿using NamedPipeWrapper.IO;
+using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Threading;
-using NamedPipeWrapper.IO;
 
 namespace NamedPipeWrapper
 {
     internal static class PipeClientFactory
     {
+        [DllImport("kernel32.dll",
+            CharSet = CharSet.Unicode,
+            EntryPoint = "WaitNamedPipeW",
+            SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool WaitNamedPipe(string name, int timeout);
 
         private static bool NamedPipeExists(string pipeName)

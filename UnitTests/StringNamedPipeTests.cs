@@ -1,16 +1,16 @@
+using FluentAssertions;
+using NamedPipeWrapper;
+using NUnit.Framework;
 using System;
 using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading;
-using FluentAssertions;
-using NamedPipeWrapper;
-using NUnit.Framework;
 
 namespace UnitTests
 {
     [TestFixture]
-    public class StringNamedPipeTests
+    public class StringNamedPipeTests : IDisposable
     {
         private const string PipeName = "test-pipe";
         private const int Timeout = 1000;
@@ -21,6 +21,8 @@ namespace UnitTests
         private ConcurrentQueue<string> _serverMessageQueue;
 
         private ManualResetEvent _serverReceivedMessageEvent;
+
+        private bool _disposed;
 
         [SetUp]
         public void SetUp()
@@ -103,6 +105,26 @@ namespace UnitTests
         {
             _serverMessageQueue.Enqueue(message);
             _serverReceivedMessageEvent.Set();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _serverReceivedMessageEvent.Dispose();
+                _client.Dispose();
+            }
+
+            _disposed = true;
         }
 
         #endregion

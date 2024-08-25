@@ -1,9 +1,9 @@
-﻿using System;
+﻿using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
-using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -213,7 +213,7 @@ namespace NamedPipeWrapper
                 // Can we speed this up with Linq or does that add overhead?
                 foreach (NamedPipeConnection<TRead, TWrite> client in _connections)
                 {
-                    if (client.Name.Equals(targetName))
+                    if (client.Name == targetName)
                     {
                         client.PushMessage(message);
                         break;

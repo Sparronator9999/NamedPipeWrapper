@@ -13,15 +13,15 @@ namespace ExampleCLI
             Console.WriteLine("Type \"!exit\" (or press ^C) to exit.");
             Console.WriteLine();
 
-            if (args.Length >= 1 && args[0].ToLower() == "/server")
+            if (args.Length >= 1 && string.Equals(args[0], "/server", StringComparison.OrdinalIgnoreCase))
             {
                 Console.WriteLine("Started in SERVER mode.");
-                new Server(DefaultPipeName);
+                Server.Start(DefaultPipeName);
             }
             else
             {
                 Console.WriteLine("Started in CLIENT mode.");
-                new Client(DefaultPipeName);
+                Client.Start(DefaultPipeName);
             }
         }
     }

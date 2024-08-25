@@ -1,11 +1,11 @@
-﻿using System;
+﻿using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
+using System;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
-using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -18,24 +18,24 @@ namespace NamedPipeWrapper
     /// <typeparam name="TWrite">
     /// The reference type to write to the named pipe.
     /// </typeparam>
-    public class NamedPipeConnection<TRead, TWrite>
+    public class NamedPipeConnection<TRead, TWrite> : IDisposable
         where TRead : class
         where TWrite : class
     {
         /// <summary>
         /// Gets the connection's unique identifier.
         /// </summary>
-        public readonly int ID;
+        public int ID { get; }
 
         /// <summary>
         /// Gets the connection's name.
         /// </summary>
-        public readonly string Name;
+        public string Name { get; }
 
         /// <summary>
         /// Gets the connection's handle.
         /// </summary>
-        public readonly SafeHandle Handle;
+        public SafeHandle Handle { get; }
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
@@ -63,6 +63,8 @@ namespace NamedPipeWrapper
         private readonly Queue<TWrite> _writeQueue = new Queue<TWrite>();
 
         private bool _notifiedSucceeded;
+
+        private bool _disposed;
 
         internal NamedPipeConnection(int id, string name, PipeStream serverStream)
         {
@@ -177,6 +179,27 @@ namespace NamedPipeWrapper
                     _streamWrapper.WaitForPipeDrain();
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _writeSignal.Dispose();
+            }
+
+            _disposed = true;
         }
     }
 

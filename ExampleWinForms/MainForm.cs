@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace ExampleGUI
 {
-    public partial class MainForm : Form
+    internal partial class MainForm : Form
     {
         public MainForm()
         {

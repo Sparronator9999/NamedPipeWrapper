@@ -1,14 +1,14 @@
-﻿using System;
+﻿using NamedPipeWrapper;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using NamedPipeWrapper;
 
 namespace ExampleGUI
 {
-    public partial class ServerForm : Form
+    internal partial class ServerForm : Form
     {
         private readonly NamedPipeServer<string> _server = new NamedPipeServer<string>(Constants.PIPE_NAME);
-        private readonly ISet<string> _clients = new HashSet<string>();
+        private readonly HashSet<string> _clients = new HashSet<string>();
 
         public ServerForm()
         {

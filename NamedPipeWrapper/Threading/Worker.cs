@@ -30,7 +30,7 @@ namespace NamedPipeWrapper.Threading
 
         private void DoWorkImpl(object oAction)
         {
-            Action action = (Action) oAction;
+            Action action = (Action)oAction;
             try
             {
                 action();

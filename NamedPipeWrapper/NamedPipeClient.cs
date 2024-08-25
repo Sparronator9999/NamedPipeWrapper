@@ -1,8 +1,8 @@
-﻿using System;
+﻿using NamedPipeWrapper.IO;
+using NamedPipeWrapper.Threading;
+using System;
 using System.IO.Pipes;
 using System.Threading;
-using NamedPipeWrapper.IO;
-using NamedPipeWrapper.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -35,7 +35,7 @@ namespace NamedPipeWrapper
     /// <typeparam name="TWrite">
     /// The reference type to write to the named pipe.
     /// </typeparam>
-    public class NamedPipeClient<TRead, TWrite>
+    public class NamedPipeClient<TRead, TWrite> : IDisposable
         where TRead : class
         where TWrite : class
     {
@@ -82,6 +82,8 @@ namespace NamedPipeWrapper
         private readonly AutoResetEvent _disconnected = new AutoResetEvent(false);
 
         private volatile bool _closedExplicitly;
+
+        private bool _disposed;
 
         /// <summary>
         /// Constructs a new <see cref="NamedPipeClient{TRead,TWrite}"/> to
@@ -185,7 +187,7 @@ namespace NamedPipeWrapper
         /// </summary>
         public bool WaitForDisconnection()
         {
-           return _disconnected.WaitOne();
+            return _disconnected.WaitOne();
         }
 
         /// <summary>
@@ -282,5 +284,27 @@ namespace NamedPipeWrapper
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _connected.Dispose();
+                _disconnected.Dispose();
+            }
+
+            _disposed = true;
+        }
     }
 }

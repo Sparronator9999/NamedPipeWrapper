@@ -1,16 +1,17 @@
-﻿using System;
+﻿using NamedPipeWrapper;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
-using NamedPipeWrapper;
 
 namespace ExampleCLI
 {
-    internal class Server
+    internal static class Server
     {
-        private readonly List<int> ClientIDs = new List<int>();
-        private readonly Dictionary<int, string> ClientNames = new Dictionary<int, string>();
+        private static readonly List<int> ClientIDs = new List<int>();
+        private static readonly Dictionary<int, string> ClientNames = new Dictionary<int, string>();
 
-        public Server(string pipeName)
+        public static void Start(string pipeName)
         {
             NamedPipeServer<string> server = new NamedPipeServer<string>(pipeName);
             server.ClientConnected += OnClientConnected;
@@ -25,11 +26,6 @@ namespace ExampleCLI
                 server.Stop();
             };
 
-            Loop(server);
-        }
-
-        private void Loop(NamedPipeServer<string> server)
-        {
             while (true)
             {
                 string input = Console.ReadLine();
@@ -43,7 +39,7 @@ namespace ExampleCLI
                 }
                 else if (args[0][0] == '!')
                 {
-                    switch (args[0].ToLower())
+                    switch (args[0].ToLower(CultureInfo.InvariantCulture))
                     {
                         case "!exit":
                         {
@@ -136,7 +132,7 @@ namespace ExampleCLI
             }
         }
 
-        private void OnClientConnected(NamedPipeConnection<string, string> connection)
+        private static void OnClientConnected(NamedPipeConnection<string, string> connection)
         {
             ClientIDs.Add(connection.ID);
             ClientNames.Add(connection.ID, connection.Name);
@@ -144,19 +140,19 @@ namespace ExampleCLI
             connection.PushMessage("Welcome! You are now connected to the server.");
         }
 
-        private void OnClientDisconnected(NamedPipeConnection<string, string> connection)
+        private static void OnClientDisconnected(NamedPipeConnection<string, string> connection)
         {
             ClientIDs.Remove(connection.ID);
             ClientNames.Remove(connection.ID);
             Console.WriteLine($"Client {connection.ID} disconnected");
         }
 
-        private void OnClientMessage(NamedPipeConnection<string, string> connection, string message)
+        private static void OnClientMessage(NamedPipeConnection<string, string> connection, string message)
         {
             Console.WriteLine($"<Client {connection.ID}> {message}");
         }
 
-        private void OnError(Exception exception)
+        private static void OnError(Exception exception)
         {
             Console.Error.WriteLine($"ERROR: {exception}");
         }

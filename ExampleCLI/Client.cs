@@ -1,12 +1,13 @@
-﻿using System;
+﻿using NamedPipeWrapper;
+using System;
+using System.Globalization;
 using System.Text;
-using NamedPipeWrapper;
 
 namespace ExampleCLI
 {
-    internal class Client
+    internal static class Client
     {
-        public Client(string pipeName)
+        public static void Start(string pipeName)
         {
             NamedPipeClient<string> client = new NamedPipeClient<string>(pipeName);
             client.ServerMessage += OnServerMessage;
@@ -19,11 +20,6 @@ namespace ExampleCLI
                 client.Stop();
             };
 
-            Loop(client);
-        }
-
-        private void Loop(NamedPipeClient<string> client)
-        {
             while (true)
             {
                 string input = Console.ReadLine();
@@ -37,7 +33,7 @@ namespace ExampleCLI
                 }
                 else if (args[0][0] == '!')
                 {
-                    switch (args[0].ToLower())
+                    switch (args[0].ToLower(CultureInfo.InvariantCulture))
                     {
                         case "!exit":
                         {
@@ -91,12 +87,12 @@ namespace ExampleCLI
             }
         }
 
-        private void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
+        private static void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
         {
             Console.WriteLine($"<Server> {message}");
         }
 
-        private void OnError(Exception exception)
+        private static void OnError(Exception exception)
         {
             Console.Error.WriteLine($"ERROR: {exception}");
         }

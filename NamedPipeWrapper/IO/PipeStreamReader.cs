@@ -55,7 +55,7 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="IOException"/>
         private int ReadLength()
         {
-            const int lensize = sizeof (int);
+            const int lensize = sizeof(int);
             byte[] lenbuf = new byte[lensize];
             int bytesRead = BaseStream.Read(lenbuf, 0, lensize);
             if (bytesRead == 0)
@@ -75,7 +75,7 @@ namespace NamedPipeWrapper.IO
             BaseStream.Read(data, 0, len);
             using (MemoryStream memoryStream = new MemoryStream(data))
             {
-                return (T) _binaryFormatter.Deserialize(memoryStream);
+                return (T)_binaryFormatter.Deserialize(memoryStream);
             }
         }
 
@@ -97,20 +97,15 @@ namespace NamedPipeWrapper.IO
         {
             if (typeof(T) == typeof(string))
             {
-                return (T) ReadString();
+                const int bufferSize = 1024;
+                byte[] data = new byte[bufferSize];
+                BaseStream.Read(data, 0, bufferSize);
+                string message = Encoding.Unicode.GetString(data).TrimEnd('\0');
+
+                return (message.Length > 0 ? message : null) as T;
             }
             int len = ReadLength();
             return len == 0 ? default : ReadObject(len);
-        }
-
-        private object ReadString()
-        {
-            const int bufferSize = 1024;
-            byte[] data = new byte[bufferSize];
-            BaseStream.Read(data, 0, bufferSize);
-            string message = Encoding.Unicode.GetString(data).TrimEnd('\0');
-            
-            return message.Length > 0 ? message : null;
         }
     }
 }

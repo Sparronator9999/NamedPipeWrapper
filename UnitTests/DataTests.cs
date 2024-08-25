@@ -1,17 +1,18 @@
-﻿using System;
+﻿using log4net.Appender;
+using log4net.Config;
+using log4net.Layout;
+using NamedPipeWrapper;
+using NUnit.Framework;
+using System;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using NUnit.Framework;
-using NamedPipeWrapper;
-using log4net.Appender;
-using log4net.Config;
-using log4net.Layout;
 
 namespace UnitTests
 {
     [TestFixture]
-    internal class DataTests
+    internal sealed class DataTests : IDisposable
     {
         private static readonly log4net.ILog Logger =
             log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -37,6 +38,8 @@ namespace UnitTests
         private DateTime _startTime;
 
         private readonly ManualResetEvent _barrier = new ManualResetEvent(false);
+
+        private bool _disposed;
 
         #region Setup and teardown
 
@@ -98,7 +101,7 @@ namespace UnitTests
             _client.Error -= ClientOnError;
 
             Logger.Debug("Client and server stopped");
-            Logger.DebugFormat("Test took {0}", DateTime.Now - _startTime);
+            Logger.Debug($"Test took {DateTime.Now - _startTime}");
             Logger.Debug("~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
 
@@ -115,7 +118,7 @@ namespace UnitTests
 
         private void ServerOnClientMessage(NamedPipeConnection<byte[], byte[]> connection, byte[] message)
         {
-            Logger.DebugFormat("Received {0} bytes from the client", message.Length);
+            Logger.Debug($"Received {message.Length} bytes from the client");
             _actualHash = Hash(message);
             _barrier.Set();
         }
@@ -130,7 +133,7 @@ namespace UnitTests
             SendMessageToServer(0);
             _barrier.WaitOne(TimeSpan.FromSeconds(2));
             Assert.NotNull(_actualHash, "Server should have received a zero-byte message from the client");
-            Assert.AreEqual(_expectedHash, _actualHash, "SHA-1 hashes for zero-byte message should match");
+            Assert.AreEqual(_expectedHash, _actualHash, "SHA-256 hashes for zero-byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should not disconnect the client for explicitly sending zero-length data");
         }
 
@@ -140,8 +143,8 @@ namespace UnitTests
             const int numBytes = 1;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -151,8 +154,8 @@ namespace UnitTests
             const int numBytes = 2;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -162,8 +165,8 @@ namespace UnitTests
             const int numBytes = 3;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -173,8 +176,8 @@ namespace UnitTests
             const int numBytes = 9;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -184,8 +187,8 @@ namespace UnitTests
             const int numBytes = 33;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -195,8 +198,8 @@ namespace UnitTests
             const int numBytes = 129;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -206,8 +209,8 @@ namespace UnitTests
             const int numBytes = 1025;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -217,8 +220,8 @@ namespace UnitTests
             const int numBytes = 1024 * 1024 + 1;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -228,8 +231,8 @@ namespace UnitTests
             const int numBytes = 1024 * 1024 * 100 + 1;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -239,8 +242,8 @@ namespace UnitTests
             const int numBytes = 1024 * 1024 * 200 + 1;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -250,8 +253,8 @@ namespace UnitTests
             const int numBytes = 1024 * 1024 * 300 + 1;
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -263,8 +266,8 @@ namespace UnitTests
             _barrier.Reset();
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
 
             Logger.Debug("...");
@@ -272,8 +275,8 @@ namespace UnitTests
             _barrier.Reset();
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
 
             Logger.Debug("...");
@@ -281,8 +284,8 @@ namespace UnitTests
             _barrier.Reset();
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -294,8 +297,8 @@ namespace UnitTests
             _barrier.Reset();
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
 
             Logger.Debug("...");
@@ -303,8 +306,8 @@ namespace UnitTests
             _barrier.Reset();
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
 
             Logger.Debug("...");
@@ -312,8 +315,8 @@ namespace UnitTests
             _barrier.Reset();
             SendMessageToServer(numBytes);
             _barrier.WaitOne(TimeSpan.FromSeconds(20));
-            Assert.NotNull(_actualHash, string.Format("Server should have received client's {0} byte message", numBytes));
-            Assert.AreEqual(_expectedHash, _actualHash, string.Format("SHA-1 hashes for {0} byte message should match", numBytes));
+            Assert.NotNull(_actualHash, $"Server should have received client's {numBytes} byte message");
+            Assert.AreEqual(_expectedHash, _actualHash, $"SHA-256 hashes for {numBytes} byte message should match");
             Assert.IsFalse(_clientDisconnected, "Server should still be connected to the client");
         }
 
@@ -323,42 +326,66 @@ namespace UnitTests
 
         private void SendMessageToServer(int numBytes)
         {
-            Logger.DebugFormat("Generating {0} bytes of random data...", numBytes);
+            Logger.Debug($"Generating {numBytes} bytes of random data...");
 
-            // Generate some random data and compute its SHA-1 hash
+            // Generate some random data and compute its SHA-256 hash
             byte[] data = new byte[numBytes];
             new Random().NextBytes(data);
 
-            Logger.DebugFormat("Computing SHA-1 hash for {0} bytes of data...", numBytes);
+            Logger.Debug($"Computing SHA-256 hash for {numBytes} bytes of data...");
 
             _expectedHash = Hash(data);
 
-            Logger.DebugFormat("Sending {0} bytes of data to the client...", numBytes);
+            Logger.Debug($"Sending {numBytes} bytes of data to the client...");
 
             _client.PushMessage(data);
 
-            Logger.DebugFormat("Finished sending {0} bytes of data to the client", numBytes);
+            Logger.Debug($"Finished sending {numBytes} bytes of data to the client");
         }
 
         /// <summary>
-        /// Computes the SHA-1 hash (lowercase) of the specified byte array.
+        /// Computes the SHA-256 hash (lowercase) of the specified byte array.
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
         private static string Hash(byte[] bytes)
         {
-            using (SHA1 sha1 = SHA1.Create())
+            using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] hash = sha1.ComputeHash(bytes);
+                byte[] hash = sha256.ComputeHash(bytes);
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hash.Length; i++)
                 {
-                    sb.Append(hash[i].ToString("x2"));
+                    sb.Append(hash[i].ToString("x2", CultureInfo.InvariantCulture));
                 }
                 return sb.ToString();
             }
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // Dispose managed resources
+                _barrier.Dispose();
+            }
+
+            // no unmanaged resources to dispose when `disposing` is false
+
+            _disposed = true;
+        }
     }
 }
