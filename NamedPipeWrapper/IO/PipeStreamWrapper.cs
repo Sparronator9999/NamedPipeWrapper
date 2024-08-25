@@ -2,7 +2,6 @@
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.Serialization;
-using Twosense.WindowsService.ExposedInterfaces;
 
 namespace NamedPipeWrapper.IO
 {
@@ -79,7 +78,6 @@ namespace NamedPipeWrapper.IO
 
         private readonly PipeStreamReader<TRead> _reader;
         private readonly PipeStreamWriter<TWrite> _writer;
-        private IExposedLogger _logger;
 
         /// <summary>
         /// Constructs a new <see cref="PipeStreamWrapper{TRead, TWrite}"/>
@@ -103,7 +101,6 @@ namespace NamedPipeWrapper.IO
         /// This method blocks until an object
         /// is sent or the pipe is disconnected.
         /// </remarks>
-        /// </summary>
         /// <returns>
         /// The next object read from the pipe, or
         /// <c>null</c> if the pipe disconnected.
@@ -111,7 +108,7 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="SerializationException"/>
         public TRead ReadObject()
         {
-            LogDebug("ReadObject");
+            //LogDebug("ReadObject");
             return _reader.ReadObject();
         }
 
@@ -127,44 +124,32 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="SerializationException"/>
         public void WriteObject(TWrite obj)
         {
-            LogDebug("WriteObject");
             _writer.WriteObject(obj);
         }
 
         /// <summary>
-        ///     Waits for the other end of the pipe to read all sent bytes.
+        /// Waits for the other end of the pipe to read all sent bytes.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">The pipe is closed.</exception>
-        /// <exception cref="NotSupportedException">The pipe does not support write operations.</exception>
-        /// <exception cref="IOException">The pipe is broken or another I/O error occurred.</exception>
+        /// <exception cref="ObjectDisposedException">
+        /// The pipe is closed.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// The pipe does not support write operations.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// The pipe is broken or another I/O error occurred.
+        /// </exception>
         public void WaitForPipeDrain()
         {
-            LogDebug("WaitForPipeDrain");
             _writer.WaitForPipeDrain();
         }
 
         /// <summary>
-        ///     Closes the current stream and releases any resources (such as sockets and file handles) associated with the current stream.
+        /// Closes the current stream and releases any resources (such as sockets and file handles) associated with the current stream.
         /// </summary>
         public void Close()
         {
-            LogDebug("Close");
             BaseStream.Close();
-        }
-        
-        public void SetLogger(IExposedLogger logger)
-        {
-            _logger = logger;
-        }
-
-        public void LogDebug(string message)
-        {
-            _logger?.LogDebug($"NamedPipeWrapper.IO.PipeStreamWrapper: {message}");
-        }
-
-        public void LogError(Exception exception, string message)
-        {
-            _logger?.LogError(exception, $"NamedPipeWrapper.IO.PipeStreamWrapper: {message}");
         }
     }
 }
