@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "ExampleCLI": {
-      "commandName": "Project",
-      "commandLineArgs": "/server"
-    }
-  }
-}

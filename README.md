@@ -19,6 +19,9 @@ Available as a [NuGet package](https://www.nuget.org/packages/NamedPipeWrapper/)
 
 These changes will be added to the changelog of an upcoming release.
 
+Note: some changes that have been added in upstream forks that have been removed
+in this fork are not listed here (e.g. the logging functionality of twosense's fork)
+
 #### This fork
 
 - Upgrade to .NET Framework 4.8 (.NET support coming soon)
@@ -71,7 +74,7 @@ public class MyMessage
 
 Add the following code to your *server* application's startup method (e.g. `Main()` in console applications):
 
-```csharp
+```cs
 NamedPipeServer<MyMessage> server = new NamedPipeServer<MyMessage>("MyServer");
 
 // Set up server events:

@@ -1,7 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <Authors>acdvorak, twosense</Authors>
+    <AssemblyTitle>Named Pipe Wrapper unit tests</AssemblyTitle>
+    <Copyright>Copyright © Andrew C. Dvorak and Contributors, 2013</Copyright>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
     <IsPackable>false</IsPackable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Product>Named Pipe Wrapper</Product>
+    <RepositoryUrl>https://github.com/Sparronator9999/NamedPipeWrapper</RepositoryUrl>
+    <TargetFramework>net48</TargetFramework>
+    <Title>Named Pipe Wrapper unit tests</Title>
+    <Version>1.6.0.0</Version>
+    <Company>Sparronator9999</Company>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="2.9.0">
@@ -16,11 +27,4 @@
   <ItemGroup>
     <ProjectReference Include="..\NamedPipeWrapper\NamedPipeWrapper.csproj" />
   </ItemGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
