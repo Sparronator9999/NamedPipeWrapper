@@ -24,7 +24,7 @@ namespace NamedPipeWrapper.IO
         /// <summary>
         /// Gets the underlying <see cref="PipeStream"/> object.
         /// </summary>
-        public PipeStream BaseStream { get; private set; }
+        internal PipeStream BaseStream { get; private set; }
 
         private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
@@ -35,12 +35,47 @@ namespace NamedPipeWrapper.IO
         /// <param name="stream">
         /// The named pipe to write to.
         /// </param>
-        public PipeStreamWriter(PipeStream stream)
+        internal PipeStreamWriter(PipeStream stream)
         {
             BaseStream = stream;
         }
 
-        #region Private stream writers
+        /// <summary>
+        /// Writes an object to the pipe.
+        /// </summary>
+        /// <remarks>
+        /// This method blocks until all data is sent.
+        /// </remarks>
+        /// <param name="obj">
+        /// The object to write to the pipe.
+        /// </param>
+        /// <exception cref="SerializationException"/>
+        internal void WriteObject(T obj)
+        {
+            byte[] data;
+            if (typeof(T) == typeof(string))
+            {
+                data = Encoding.Unicode.GetBytes(obj.ToString());
+            }
+            else
+            {
+                data = Serialize(obj);
+                WriteLength(data.Length);
+            }
+            BaseStream.Write(data, 0, data.Length);
+            BaseStream.Flush();
+        }
+
+        /// <summary>
+        /// Waits for the other end of the pipe to read all sent bytes.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="IOException"/>
+        internal void WaitForPipeDrain()
+        {
+            BaseStream.WaitForPipeDrain();
+        }
 
         /// <exception cref="SerializationException"/>
         private byte[] Serialize(T obj)
@@ -56,55 +91,6 @@ namespace NamedPipeWrapper.IO
         {
             byte[] lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
             BaseStream.Write(lenbuf, 0, lenbuf.Length);
-        }
-
-        private void WriteObject(byte[] data)
-        {
-            BaseStream.Write(data, 0, data.Length);
-        }
-
-        private void Flush()
-        {
-            BaseStream.Flush();
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Writes an object to the pipe.
-        /// </summary>
-        /// <remarks>
-        /// This method blocks until all data is sent.
-        /// </remarks>
-        /// <param name="obj">
-        /// The object to write to the pipe.
-        /// </param>
-        /// <exception cref="SerializationException"/>
-        public void WriteObject(T obj)
-        {
-            byte[] data;
-            if (typeof(T) == typeof(string))
-            {
-                data = Encoding.Unicode.GetBytes(obj.ToString());
-            }
-            else
-            {
-                data = Serialize(obj);
-                WriteLength(data.Length);
-            }
-            WriteObject(data);
-            Flush();
-        }
-
-        /// <summary>
-        /// Waits for the other end of the pipe to read all sent bytes.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException"/>
-        /// <exception cref="NotSupportedException"/>
-        /// <exception cref="IOException"/>
-        public void WaitForPipeDrain()
-        {
-            BaseStream.WaitForPipeDrain();
         }
     }
 }

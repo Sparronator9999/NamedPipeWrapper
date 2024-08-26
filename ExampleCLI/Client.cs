@@ -87,14 +87,14 @@ namespace ExampleCLI
             }
         }
 
-        private static void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
+        private static void OnServerMessage(object sender, PipeMessageEventArgs<string, string> e)
         {
-            Console.WriteLine($"<Server> {message}");
+            Console.WriteLine($"<Server> {e.Message}");
         }
 
-        private static void OnError(Exception exception)
+        private static void OnError(object sender, WorkerErrorEventArgs e)
         {
-            Console.Error.WriteLine($"ERROR: {exception}");
+            Console.Error.WriteLine($"ERROR: {e}");
         }
     }
 }

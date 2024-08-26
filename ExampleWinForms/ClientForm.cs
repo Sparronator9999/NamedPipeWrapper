@@ -21,15 +21,15 @@ namespace ExampleGUI
             _client.Start();
         }
 
-        private void OnServerMessage(NamedPipeConnection<string, string> connection, string message)
+        private void OnServerMessage(object sender, PipeMessageEventArgs<string, string> e)
         {
             txtMessages.Invoke(new Action(delegate
             {
-                AddLine($"<Server> {message}");
+                AddLine($"<Server> {e.Message}");
             }));
         }
 
-        private void OnDisconnected(NamedPipeConnection<string, string> connection)
+        private void OnDisconnected(object sender, PipeConnectionEventArgs<string, string> e)
         {
             txtMessages.Invoke(new Action(delegate
             {

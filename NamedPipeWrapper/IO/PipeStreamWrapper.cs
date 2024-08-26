@@ -43,7 +43,7 @@ namespace NamedPipeWrapper.IO
         /// <summary>
         /// Gets the underlying <see cref="PipeStream"/> object.
         /// </summary>
-        public PipeStream BaseStream { get; private set; }
+        internal PipeStream BaseStream { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the
@@ -53,7 +53,7 @@ namespace NamedPipeWrapper.IO
         /// <c>true</c> if the <see cref="BaseStream"/>
         /// object is connected, otherwise <c>false</c>.
         /// </returns>
-        public bool IsConnected => BaseStream.IsConnected && _reader.IsConnected;
+        internal bool IsConnected => BaseStream.IsConnected && _reader.IsConnected;
 
         /// <summary>
         /// Gets a value indicating whether the
@@ -63,7 +63,7 @@ namespace NamedPipeWrapper.IO
         /// <c>true</c> if the stream supports read
         /// operations, otherwise <c>false</c>.
         /// </returns>
-        public bool CanRead => BaseStream.CanRead;
+        internal bool CanRead => BaseStream.CanRead;
 
         /// <summary>
         /// Gets a value indicating whether the current
@@ -73,7 +73,7 @@ namespace NamedPipeWrapper.IO
         /// <c>true</c> if the stream supports write
         /// operation, otherwise <c>false</c>.
         /// </returns>
-        public bool CanWrite => BaseStream.CanWrite;
+        internal bool CanWrite => BaseStream.CanWrite;
 
         private readonly PipeStreamReader<TRead> _reader;
         private readonly PipeStreamWriter<TWrite> _writer;
@@ -86,7 +86,7 @@ namespace NamedPipeWrapper.IO
         /// <param name="stream">
         /// The stream to read from and write to.
         /// </param>
-        public PipeStreamWrapper(PipeStream stream)
+        internal PipeStreamWrapper(PipeStream stream)
         {
             BaseStream = stream;
             _reader = new PipeStreamReader<TRead>(BaseStream);
@@ -105,7 +105,7 @@ namespace NamedPipeWrapper.IO
         /// <c>null</c> if the pipe disconnected.
         /// </returns>
         /// <exception cref="SerializationException"/>
-        public TRead ReadObject()
+        internal TRead ReadObject()
         {
             return _reader.ReadObject();
         }
@@ -120,7 +120,7 @@ namespace NamedPipeWrapper.IO
         /// Tne object to write to the pipe.
         /// </param>
         /// <exception cref="SerializationException"/>
-        public void WriteObject(TWrite obj)
+        internal void WriteObject(TWrite obj)
         {
             _writer.WriteObject(obj);
         }
@@ -137,7 +137,7 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="IOException">
         /// The pipe is broken or another I/O error occurred.
         /// </exception>
-        public void WaitForPipeDrain()
+        internal void WaitForPipeDrain()
         {
             _writer.WaitForPipeDrain();
         }
@@ -147,7 +147,7 @@ namespace NamedPipeWrapper.IO
         /// resources (such as sockets and file handles)
         /// associated with the current stream.
         /// </summary>
-        public void Close()
+        internal void Close()
         {
             BaseStream.Close();
         }

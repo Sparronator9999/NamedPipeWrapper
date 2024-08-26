@@ -101,9 +101,9 @@ namespace UnitTests
             _client.Flush();
         }
 
-        private void OnClientMessageReceived(NamedPipeConnection<string, string> connection, string message)
+        private void OnClientMessageReceived(object sender, PipeMessageEventArgs<string, string> e)
         {
-            _serverMessageQueue.Enqueue(message);
+            _serverMessageQueue.Enqueue(e.Message);
             _serverReceivedMessageEvent.Set();
         }
 

@@ -32,6 +32,11 @@ in this fork are not listed here (e.g. the logging functionality of twosense's f
   - Make GUI and CLI apps compatible with each other
   - Rename ExampleGUI to ExampleWinForms to prepare for a WPF version
 - Better code documentation
+- Stricter access modifiers for internal functions
+  - This may break applications that use some of NamedPipeWrapper's internal functions
+    (e.g. `PipeStreamReader`, `PipeStreamWriter`, or `PipeStreamWrapper`)
+- **Breaking change:** Change events to use ".NET-style" `sender` and `e` arguments for every event
+  - An upgrade guide will be released soon
 
 #### From [twosense's fork](https://github.com/twosense/named-pipe-wrapper):
 

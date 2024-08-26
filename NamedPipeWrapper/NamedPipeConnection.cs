@@ -35,7 +35,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Gets the connection's handle.
         /// </summary>
-        public SafeHandle Handle { get; }
+        public SafeHandle Handle => _streamWrapper.BaseStream.SafePipeHandle;
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
@@ -45,17 +45,17 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> Disconnected;
+        internal event EventHandler<PipeConnectionEventArgs<TRead, TWrite>> Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite> ReceiveMessage;
+        internal event EventHandler<PipeMessageEventArgs<TRead, TWrite>> ReceiveMessage;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        public event ConnectionExceptionEventHandler<TRead, TWrite> Error;
+        internal event EventHandler<PipeErrorEventArgs<TRead, TWrite>> Error;
 
         private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
 
@@ -70,8 +70,23 @@ namespace NamedPipeWrapper
         {
             ID = id;
             Name = name;
-            Handle = serverStream.SafePipeHandle;
             _streamWrapper = new PipeStreamWrapper<TRead, TWrite>(serverStream);
+        }
+
+        /// <summary>
+        /// Adds the specified message to the write queue.
+        /// </summary>
+        /// <remarks>
+        /// The message will be written to the named pipe by the
+        /// background thread at the next available opportunity.
+        /// </remarks>
+        /// <param name="message">
+        /// The message to write to the named pipe.
+        /// </param>
+        public void PushMessage(TWrite message)
+        {
+            _writeQueue.Enqueue(message);
+            _writeSignal.Set();
         }
 
         /// <summary>
@@ -95,22 +110,6 @@ namespace NamedPipeWrapper
         }
 
         /// <summary>
-        /// Adds the specified message to the write queue.
-        /// </summary>
-        /// <remarks>
-        /// The message will be written to the named pipe by the
-        /// background thread at the next available opportunity.
-        /// </remarks>
-        /// <param name="message">
-        /// The message to write to the named pipe.
-        /// </param>
-        public void PushMessage(TWrite message)
-        {
-            _writeQueue.Enqueue(message);
-            _writeSignal.Set();
-        }
-
-        /// <summary>
         /// Closes the named pipe connection and
         /// underlying <see cref="PipeStream"/>.
         /// </summary>
@@ -126,7 +125,7 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked on the UI thread.
         /// </summary>
-        private void OnSucceeded()
+        private void OnSucceeded(object sender, EventArgs e)
         {
             // Only notify observers once
             if (_notifiedSucceeded)
@@ -134,16 +133,17 @@ namespace NamedPipeWrapper
 
             _notifiedSucceeded = true;
 
-            Disconnected?.Invoke(this);
+            PipeConnectionEventArgs<TRead, TWrite> e2 = new PipeConnectionEventArgs<TRead, TWrite>(this);
+            Disconnected?.Invoke(sender, e2);
         }
 
         /// <summary>
         /// Invoked on the UI thread.
         /// </summary>
         /// <param name="exception"></param>
-        private void OnError(Exception exception)
+        private void OnError(object sender, WorkerErrorEventArgs e)
         {
-            Error?.Invoke(this, exception);
+            Error?.Invoke(sender, new PipeErrorEventArgs<TRead, TWrite>(this, e.Exception));
         }
 
         /// <summary>
@@ -160,7 +160,10 @@ namespace NamedPipeWrapper
                     Close();
                     return;
                 }
-                ReceiveMessage?.Invoke(this, obj);
+                PipeMessageEventArgs<TRead, TWrite> e =
+                    new PipeMessageEventArgs<TRead, TWrite>(this, obj);
+
+                ReceiveMessage?.Invoke(this, e);
             }
         }
 
@@ -202,70 +205,4 @@ namespace NamedPipeWrapper
             _disposed = true;
         }
     }
-
-    internal static class ConnectionFactory
-    {
-        private static int _lastId;
-
-        public static NamedPipeConnection<TRead, TWrite> CreateConnection<TRead, TWrite>(PipeStream pipeStream)
-            where TRead : class
-            where TWrite : class
-        {
-            return new NamedPipeConnection<TRead, TWrite>(++_lastId, $"Client {_lastId}", pipeStream);
-        }
-    }
-
-    /// <summary>
-    /// Handles new connections.
-    /// </summary>
-    /// <param name="connection">
-    /// The newly established connection.
-    /// </param>
-    /// <typeparam name="TRead">
-    /// The reference type used when reading from the named pipe.
-    /// </typeparam>
-    /// <typeparam name="TWrite">
-    /// The reference type used when writing to the named pipe.
-    /// </typeparam>
-    public delegate void ConnectionEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection)
-        where TRead : class
-        where TWrite : class;
-
-    /// <summary>
-    /// Handles messages received from a named pipe.
-    /// </summary>
-    /// <typeparam name="TRead">
-    /// The reference type used when reading from the named pipe.
-    /// </typeparam>
-    /// <typeparam name="TWrite">
-    /// The reference type used when writing to the named pipe.
-    /// </typeparam>
-    /// <param name="connection">
-    /// The connection that received the message.
-    /// </param>
-    /// <param name="message">
-    /// The message sent by the other end of the pipe.
-    /// </param>
-    public delegate void ConnectionMessageEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection, TRead message)
-        where TRead : class
-        where TWrite : class;
-
-    /// <summary>
-    /// Handles exceptions thrown during read/write operations.
-    /// </summary>
-    /// <typeparam name="TRead">
-    /// The reference type used when reading from the named pipe.
-    /// </typeparam>
-    /// <typeparam name="TWrite">
-    /// The reference type used when writing to the named pipe.
-    /// </typeparam>
-    /// <param name="connection">
-    /// The connection that threw the exception.
-    /// </param>
-    /// <param name="exception">
-    /// The exception that was thrown.
-    /// </param>
-    public delegate void ConnectionExceptionEventHandler<TRead, TWrite>(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
-        where TRead : class
-        where TWrite : class;
 }

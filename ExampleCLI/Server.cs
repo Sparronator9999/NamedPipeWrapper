@@ -132,29 +132,29 @@ namespace ExampleCLI
             }
         }
 
-        private static void OnClientConnected(NamedPipeConnection<string, string> connection)
+        private static void OnClientConnected(object sender, PipeConnectionEventArgs<string, string> e)
         {
-            ClientIDs.Add(connection.ID);
-            ClientNames.Add(connection.ID, connection.Name);
-            Console.WriteLine($"Client {connection.ID} is now connected!");
-            connection.PushMessage("Welcome! You are now connected to the server.");
+            ClientIDs.Add(e.Connection.ID);
+            ClientNames.Add(e.Connection.ID, e.Connection.Name);
+            Console.WriteLine($"Client {e.Connection.ID} is now connected!");
+            e.Connection.PushMessage("Welcome! You are now connected to the server.");
         }
 
-        private static void OnClientDisconnected(NamedPipeConnection<string, string> connection)
+        private static void OnClientDisconnected(object sender, PipeConnectionEventArgs<string, string> e)
         {
-            ClientIDs.Remove(connection.ID);
-            ClientNames.Remove(connection.ID);
-            Console.WriteLine($"Client {connection.ID} disconnected");
+            ClientIDs.Remove(e.Connection.ID);
+            ClientNames.Remove(e.Connection.ID);
+            Console.WriteLine($"Client {e.Connection.ID} disconnected");
         }
 
-        private static void OnClientMessage(NamedPipeConnection<string, string> connection, string message)
+        private static void OnClientMessage(object sender, PipeMessageEventArgs<string, string> e)
         {
-            Console.WriteLine($"<Client {connection.ID}> {message}");
+            Console.WriteLine($"<Client {e.Connection.ID}> {e.Message}");
         }
 
-        private static void OnError(Exception exception)
+        private static void OnError(object sender, WorkerErrorEventArgs e)
         {
-            Console.Error.WriteLine($"ERROR: {exception}");
+            Console.Error.WriteLine($"ERROR: {e.Exception}");
         }
     }
 }

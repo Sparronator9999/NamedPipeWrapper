@@ -53,23 +53,23 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a client connects to the server.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> ClientConnected;
+        public event EventHandler<PipeConnectionEventArgs<TRead, TWrite>> ClientConnected;
 
         /// <summary>
         /// Invoked whenever a client disconnects from the server.
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> ClientDisconnected;
+        public event EventHandler<PipeConnectionEventArgs<TRead, TWrite>> ClientDisconnected;
 
         /// <summary>
         /// Invoked whenever a client sends a message to the server.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite> ClientMessage;
+        public event EventHandler<PipeMessageEventArgs<TRead, TWrite>> ClientMessage;
 
         /// <summary>
         /// Invoked whenever an exception is thrown
         /// during a read or write operation.
         /// </summary>
-        public event PipeExceptionEventHandler Error;
+        public event EventHandler<PipeErrorEventArgs<TRead, TWrite>> Error;
 
         private readonly string _pipeName;
         private readonly int _bufferSize;
@@ -120,7 +120,7 @@ namespace NamedPipeWrapper
         {
             _shouldKeepRunning = true;
             Worker worker = new Worker();
-            worker.Error += OnError;
+            worker.Error += WorkerOnError;
             worker.DoWork(ListenSync);
         }
 
@@ -308,17 +308,23 @@ namespace NamedPipeWrapper
 
                 lock (_connections) { _connections.Add(connection); }
 
-                ClientOnConnected(connection);
+                PipeConnectionEventArgs<TRead, TWrite> e =
+                    new PipeConnectionEventArgs<TRead, TWrite>(connection);
+
+                ClientOnConnected(this, e);
             }
             // Catch the IOException that is raised if the pipe is broken or disconnected.
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.Error.WriteLine($"Named pipe is broken or disconnected: {e}");
+                Console.Error.WriteLine($"Named pipe is broken or disconnected: {ex}");
 
                 Cleanup(handshakePipe);
                 Cleanup(dataPipe);
 
-                ClientOnDisconnected(connection);
+                PipeConnectionEventArgs<TRead, TWrite> e =
+                    new PipeConnectionEventArgs<TRead, TWrite>(connection);
+
+                ClientOnDisconnected(this, e);
             }
         }
 
@@ -336,46 +342,48 @@ namespace NamedPipeWrapper
                 : PipeServerFactory.CreatePipe(connectionPipeName, _bufferSize, _security);
         }
 
-        private void ClientOnConnected(NamedPipeConnection<TRead, TWrite> connection)
+        private void ClientOnConnected(object sender, PipeConnectionEventArgs<TRead, TWrite> e)
         {
-            ClientConnected?.Invoke(connection);
+            ClientConnected?.Invoke(sender, e);
         }
 
-        private void ClientOnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
+        private void ClientOnReceiveMessage(object sender, PipeMessageEventArgs<TRead, TWrite> e)
         {
-            ClientMessage?.Invoke(connection, message);
+            ClientMessage?.Invoke(sender, e);
         }
 
-        private void ClientOnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
+        private void ClientOnDisconnected(object sender, PipeConnectionEventArgs<TRead, TWrite> e)
         {
-            if (connection == null)
+            if (e.Connection == null)
             {
                 return;
             }
 
             lock (_connections)
             {
-                _connections.Remove(connection);
+                _connections.Remove(e.Connection);
             }
 
-            ClientDisconnected?.Invoke(connection);
+            ClientDisconnected?.Invoke(sender, e);
         }
 
         /// <summary>
         /// Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
+        private void ConnectionOnError(object sender, PipeErrorEventArgs<TRead, TWrite> e)
         {
-            OnError(exception);
+            Error?.Invoke(sender, e);
         }
 
         /// <summary>
         /// Invoked on the UI thread.
         /// </summary>
         /// <param name="exception"></param>
-        private void OnError(Exception exception)
+        private void WorkerOnError(object sender, WorkerErrorEventArgs e)
         {
-            Error?.Invoke(exception);
+            PipeErrorEventArgs<TRead, TWrite> e2 =
+                new PipeErrorEventArgs<TRead, TWrite>(null, e.Exception);
+            Error?.Invoke(sender, e2);
         }
 
         private string GetNextConnectionPipeName()

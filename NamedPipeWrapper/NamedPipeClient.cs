@@ -61,19 +61,19 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked whenever a message is received from the server.
         /// </summary>
-        public event ConnectionMessageEventHandler<TRead, TWrite> ServerMessage;
+        public event EventHandler<PipeMessageEventArgs<TRead, TWrite>> ServerMessage;
 
         /// <summary>
         /// Invoked when the client disconnects from the server
         /// (e.g. when the pipe is closed or broken).
         /// </summary>
-        public event ConnectionEventHandler<TRead, TWrite> Disconnected;
+        public event EventHandler<PipeConnectionEventArgs<TRead, TWrite>> Disconnected;
 
         /// <summary>
         /// Invoked whenever an exception is thrown during
         /// a read or write operation on the named pipe.
         /// </summary>
-        public event PipeExceptionEventHandler Error;
+        public event EventHandler<PipeErrorEventArgs<TRead, TWrite>> Error;
 
         private readonly string _pipeName;
         private NamedPipeConnection<TRead, TWrite> _connection;
@@ -111,8 +111,17 @@ namespace NamedPipeWrapper
         {
             _closedExplicitly = false;
             Worker worker = new Worker();
-            worker.Error += OnError;
+            worker.Error += WorkerOnError;
             worker.DoWork(ListenSync);
+        }
+
+        /// <summary>
+        /// Closes the named pipe.
+        /// </summary>
+        public void Stop()
+        {
+            _closedExplicitly = true;
+            _connection?.Close();
         }
 
         /// <summary>
@@ -124,15 +133,6 @@ namespace NamedPipeWrapper
         public void PushMessage(TWrite message)
         {
             _connection?.PushMessage(message);
-        }
-
-        /// <summary>
-        /// Closes the named pipe.
-        /// </summary>
-        public void Stop()
-        {
-            _closedExplicitly = true;
-            _connection?.Close();
         }
 
         #region Wait for connection/disconnection
@@ -248,9 +248,9 @@ namespace NamedPipeWrapper
             _connected.Set();
         }
 
-        private void OnDisconnected(NamedPipeConnection<TRead, TWrite> connection)
+        private void OnDisconnected(object sender, PipeConnectionEventArgs<TRead, TWrite> e)
         {
-            Disconnected?.Invoke(connection);
+            Disconnected?.Invoke(sender, e);
 
             _disconnected.Set();
 
@@ -262,27 +262,27 @@ namespace NamedPipeWrapper
             }
         }
 
-        private void OnReceiveMessage(NamedPipeConnection<TRead, TWrite> connection, TRead message)
+        private void OnReceiveMessage(object sender, PipeMessageEventArgs<TRead, TWrite> e)
         {
-            ServerMessage?.Invoke(connection, message);
+            ServerMessage?.Invoke(sender, e);
         }
 
         /// <summary>
         /// Invoked on the UI thread.
         /// </summary>
-        private void ConnectionOnError(NamedPipeConnection<TRead, TWrite> connection, Exception exception)
+        private void ConnectionOnError(object sender, PipeErrorEventArgs<TRead, TWrite> e)
         {
-            OnError(exception);
+            Error?.Invoke(sender, e);
         }
+
 
         /// <summary>
         /// Invoked on the UI thread.
         /// </summary>
-        private void OnError(Exception exception)
+        private void WorkerOnError(object sender, WorkerErrorEventArgs e)
         {
-            Error?.Invoke(exception);
+            Error?.Invoke(sender, new PipeErrorEventArgs<TRead, TWrite>(_connection, e.Exception));
         }
-
         #endregion
 
         public void Dispose()

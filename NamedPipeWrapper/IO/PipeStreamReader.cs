@@ -23,12 +23,12 @@ namespace NamedPipeWrapper.IO
         /// <summary>
         /// Gets the underlying <see cref="PipeStream"/> object.
         /// </summary>
-        public PipeStream BaseStream { get; private set; }
+        internal PipeStream BaseStream { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
-        public bool IsConnected { get; private set; }
+        internal bool IsConnected { get; private set; }
 
         private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
@@ -39,13 +39,38 @@ namespace NamedPipeWrapper.IO
         /// <param name="stream">
         /// The pipe stream to read from.
         /// </param>
-        public PipeStreamReader(PipeStream stream)
+        internal PipeStreamReader(PipeStream stream)
         {
             BaseStream = stream;
             IsConnected = stream.IsConnected;
         }
 
-        #region Private stream readers
+        /// <summary>
+        /// Reads the next object from the pipe.
+        /// </summary>
+        /// <remarks>
+        /// This method blocks until an object is
+        /// sent or the pipe is disconnected.
+        /// </remarks>
+        /// <returns>
+        /// The next object read from the pipe, or
+        /// <c>null</c> if the pipe disconnected.
+        /// </returns>
+        /// <exception cref="SerializationException"/>
+        internal T ReadObject()
+        {
+            if (typeof(T) == typeof(string))
+            {
+                const int bufferSize = 1024;
+                byte[] data = new byte[bufferSize];
+                BaseStream.Read(data, 0, bufferSize);
+                string message = Encoding.Unicode.GetString(data).TrimEnd('\0');
+
+                return (message.Length > 0 ? message : null) as T;
+            }
+            int len = ReadLength();
+            return len == 0 ? default : ReadObject(len);
+        }
 
         /// <summary>
         /// Reads the length of the next message (in bytes) from the client.
@@ -77,35 +102,6 @@ namespace NamedPipeWrapper.IO
             {
                 return (T)_binaryFormatter.Deserialize(memoryStream);
             }
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Reads the next object from the pipe.
-        /// </summary>
-        /// <remarks>
-        /// This method blocks until an object is
-        /// sent or the pipe is disconnected.
-        /// </remarks>
-        /// <returns>
-        /// The next object read from the pipe, or
-        /// <c>null</c> if the pipe disconnected.
-        /// </returns>
-        /// <exception cref="SerializationException"/>
-        public T ReadObject()
-        {
-            if (typeof(T) == typeof(string))
-            {
-                const int bufferSize = 1024;
-                byte[] data = new byte[bufferSize];
-                BaseStream.Read(data, 0, bufferSize);
-                string message = Encoding.Unicode.GetString(data).TrimEnd('\0');
-
-                return (message.Length > 0 ? message : null) as T;
-            }
-            int len = ReadLength();
-            return len == 0 ? default : ReadObject(len);
         }
     }
 }

@@ -82,9 +82,9 @@ namespace UnitTests
             _startTime = DateTime.Now;
         }
 
-        private void OnError(Exception exception)
+        private void OnError(object sender, WorkerErrorEventArgs e)
         {
-            _exceptions.Add(exception);
+            _exceptions.Add(e.Exception);
             _barrier.Set();
         }
 
@@ -108,12 +108,11 @@ namespace UnitTests
 
         #region Events
 
-        private void ServerOnClientMessage(NamedPipeConnection<TestCollection, TestCollection> connection,
-            TestCollection message)
+        private void ServerOnClientMessage(object sender, PipeMessageEventArgs<TestCollection, TestCollection> e)
         {
-            Logger.DebugFormat("Received collection with {0} items from the client", message.Count);
-            _actualData = message;
-            _actualHash = message.GetHashCode();
+            Logger.Debug($"Received collection with {e.Message.Count} items from the client");
+            _actualData = e.Message;
+            _actualHash = e.Message.GetHashCode();
             _barrier.Set();
         }
 

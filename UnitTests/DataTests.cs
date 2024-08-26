@@ -75,12 +75,12 @@ namespace UnitTests
             _startTime = DateTime.Now;
         }
 
-        private void ServerOnError(Exception exception)
+        private void ServerOnError(object sender, WorkerErrorEventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void ClientOnError(Exception exception)
+        private void ClientOnError(object sender, WorkerErrorEventArgs e)
         {
             throw new NotImplementedException();
         }
@@ -109,17 +109,17 @@ namespace UnitTests
 
         #region Events
 
-        private void ServerOnClientDisconnected(NamedPipeConnection<byte[], byte[]> connection)
+        private void ServerOnClientDisconnected(object sender, PipeConnectionEventArgs<byte[], byte[]> e)
         {
             Logger.Warn("Client disconnected");
             _clientDisconnected = true;
             _barrier.Set();
         }
 
-        private void ServerOnClientMessage(NamedPipeConnection<byte[], byte[]> connection, byte[] message)
+        private void ServerOnClientMessage(object sender, PipeMessageEventArgs<byte[], byte[]> e)
         {
-            Logger.Debug($"Received {message.Length} bytes from the client");
-            _actualHash = Hash(message);
+            Logger.Debug($"Received {e.Message.Length} bytes from the client");
+            _actualHash = Hash(e.Message);
             _barrier.Set();
         }
 

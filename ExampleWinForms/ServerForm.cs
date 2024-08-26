@@ -19,24 +19,24 @@ namespace ExampleGUI
             _server.Start();
         }
 
-        private void OnClientConnected(NamedPipeConnection<string, string> connection)
+        private void OnClientConnected(object sender, PipeConnectionEventArgs<string, string> e)
         {
-            _clients.Add(connection.Name);
-            AddLine($"{connection.Name} connected!");
+            _clients.Add(e.Connection.Name);
+            AddLine($"{e.Connection.Name} connected!");
             UpdateClientList();
-            connection.PushMessage("Welcome! You are now connected to the server.");
+            e.Connection.PushMessage("Welcome! You are now connected to the server.");
         }
 
-        private void OnClientDisconnected(NamedPipeConnection<string, string> connection)
+        private void OnClientDisconnected(object sender, PipeConnectionEventArgs<string, string> e)
         {
-            _clients.Remove(connection.Name);
-            AddLine($"{connection.Name} disconnected!");
+            _clients.Remove(e.Connection.Name);
+            AddLine($"{e.Connection.Name} disconnected!");
             UpdateClientList();
         }
 
-        private void OnClientMessage(NamedPipeConnection<string, string> connection, string message)
+        private void OnClientMessage(object sender, PipeMessageEventArgs<string, string> e)
         {
-            AddLine($"<{connection.Name}> {message}");
+            AddLine($"<{e.Connection.Name}> {e.Message}");
         }
 
         private void AddLine(string text)
