@@ -75,12 +75,12 @@ namespace UnitTests
             _startTime = DateTime.Now;
         }
 
-        private void ServerOnError(object sender, WorkerErrorEventArgs e)
+        private void ServerOnError(object sender, PipeErrorEventArgs<byte[], byte[]> e)
         {
             throw new NotImplementedException();
         }
 
-        private void ClientOnError(object sender, WorkerErrorEventArgs e)
+        private void ClientOnError(object sender, PipeErrorEventArgs<byte[], byte[]> e)
         {
             throw new NotImplementedException();
         }

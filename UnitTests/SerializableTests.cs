@@ -82,7 +82,7 @@ namespace UnitTests
             _startTime = DateTime.Now;
         }
 
-        private void OnError(object sender, WorkerErrorEventArgs e)
+        private void OnError(object sender, PipeErrorEventArgs<TestCollection, TestCollection> e)
         {
             _exceptions.Add(e.Exception);
             _barrier.Set();

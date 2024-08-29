@@ -92,7 +92,7 @@ namespace ExampleCLI
             Console.WriteLine($"<Server> {e.Message}");
         }
 
-        private static void OnError(object sender, WorkerErrorEventArgs e)
+        private static void OnError(object sender, PipeErrorEventArgs<string, string> e)
         {
             Console.Error.WriteLine($"ERROR: {e}");
         }
