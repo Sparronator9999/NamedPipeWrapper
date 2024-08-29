@@ -7,7 +7,7 @@ using System.IO.Pipes;
 using System.Text;
 using System.Threading;
 
-namespace UnitTests
+namespace NamedPipeWrapper.UnitTests
 {
     [TestFixture]
     public class StringNamedPipeTests : IDisposable

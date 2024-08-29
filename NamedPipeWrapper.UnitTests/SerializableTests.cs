@@ -12,7 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace UnitTests
+namespace NamedPipeWrapper.UnitTests
 {
     [TestFixture]
     internal class SerializableTests : IDisposable

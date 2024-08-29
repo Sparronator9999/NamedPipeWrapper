@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace UnitTests
+namespace NamedPipeWrapper.UnitTests
 {
     [TestFixture]
     internal sealed class DataTests : IDisposable

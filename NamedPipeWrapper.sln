@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeWrapper", "NamedPipeWrapper\NamedPipeWrapper.csproj", "{73152691-3CDE-46DF-8D04-7117747DFFE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{5E77C76A-E765-445A-96E5-681CB5B9A68B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NamedPipeWrapper.UnitTests", "NamedPipeWrapper.UnitTests\NamedPipeWrapper.UnitTests.csproj", "{5E77C76A-E765-445A-96E5-681CB5B9A68B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleCLI", "ExampleCLI\ExampleCLI.csproj", "{82BCEFD9-194E-4FF7-A28B-CA1AE2A87BAC}"
 EndProject
