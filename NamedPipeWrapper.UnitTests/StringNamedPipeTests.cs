@@ -1,5 +1,4 @@
 using FluentAssertions;
-using NamedPipeWrapper;
 using NUnit.Framework;
 using System;
 using System.Collections.Concurrent;

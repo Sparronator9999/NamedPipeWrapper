@@ -1,7 +1,6 @@
 ﻿using log4net.Appender;
 using log4net.Config;
 using log4net.Layout;
-using NamedPipeWrapper;
 using NUnit.Framework;
 using System;
 using System.Globalization;
