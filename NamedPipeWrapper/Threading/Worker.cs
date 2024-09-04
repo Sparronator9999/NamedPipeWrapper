@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace NamedPipeWrapper.Threading
 {
-    internal class Worker
+    internal sealed class Worker
     {
         private readonly TaskScheduler _callbackThread;
 

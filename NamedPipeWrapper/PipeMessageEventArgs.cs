@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NamedPipeWrapper
+﻿namespace NamedPipeWrapper
 {
     /// <summary>
     /// Provides data for the
@@ -13,15 +11,10 @@ namespace NamedPipeWrapper
     /// <typeparam name="TWrite">
     /// The reference type used when writing to the named pipe.
     /// </typeparam>
-    public class PipeMessageEventArgs<TRead, TWrite> : EventArgs
+    public class PipeMessageEventArgs<TRead, TWrite> : PipeConnectionEventArgs<TRead, TWrite>
         where TRead : class
         where TWrite : class
     {
-        /// <summary>
-        /// The connection that sent the message.
-        /// </summary>
-        public NamedPipeConnection<TRead, TWrite> Connection { get; }
-
         /// <summary>
         /// The message sent by the other end of the pipe.
         /// </summary>
@@ -37,11 +30,9 @@ namespace NamedPipeWrapper
         /// <param name="message">
         /// The message sent by the other end of the pipe.
         /// </param>
-        internal PipeMessageEventArgs(
-            NamedPipeConnection<TRead, TWrite> connection,
-            TRead message)
+        internal PipeMessageEventArgs(NamedPipeConnection<TRead, TWrite> connection, TRead message)
+            : base(connection)
         {
-            Connection = connection;
             Message = message;
         }
     }

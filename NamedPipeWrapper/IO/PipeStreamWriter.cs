@@ -19,7 +19,7 @@ namespace NamedPipeWrapper.IO
     /// <typeparam name="T">
     /// The reference type to serialize.
     /// </typeparam>
-    internal class PipeStreamWriter<T> where T : class
+    internal sealed class PipeStreamWriter<T> where T : class
     {
         /// <summary>
         /// Gets the underlying <see cref="PipeStream"/> object.
