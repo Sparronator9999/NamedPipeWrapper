@@ -45,17 +45,17 @@ namespace NamedPipeWrapper
         /// <summary>
         /// Invoked when the named pipe connection terminates.
         /// </summary>
-        internal event EventHandler<PipeConnectionEventArgs<TRead, TWrite>> Disconnected;
+        public event EventHandler<PipeConnectionEventArgs<TRead, TWrite>> Disconnected;
 
         /// <summary>
         /// Invoked whenever a message is received from the other end of the pipe.
         /// </summary>
-        internal event EventHandler<PipeMessageEventArgs<TRead, TWrite>> ReceiveMessage;
+        public event EventHandler<PipeMessageEventArgs<TRead, TWrite>> ReceiveMessage;
 
         /// <summary>
         /// Invoked when an exception is thrown during any read/write operation over the named pipe.
         /// </summary>
-        internal event EventHandler<PipeErrorEventArgs<TRead, TWrite>> Error;
+        public event EventHandler<PipeErrorEventArgs<TRead, TWrite>> Error;
 
         private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
 
