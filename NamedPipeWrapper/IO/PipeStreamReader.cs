@@ -1,9 +1,8 @@
+using MessagePack;
 using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace NamedPipeWrapper.IO
@@ -29,8 +28,6 @@ namespace NamedPipeWrapper.IO
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
         internal bool IsConnected { get; private set; }
-
-        private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
 
         /// <summary>
         /// Constructs a new <see cref="PipeStreamReader{T}"/> object
@@ -93,15 +90,12 @@ namespace NamedPipeWrapper.IO
                 : IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
         }
 
-        /// <exception cref="SerializationException"/>
+        /// <exception cref="MessagePackSerializationException"/>
         private T ReadObject(int len)
         {
             byte[] data = new byte[len];
             BaseStream.Read(data, 0, len);
-            using (MemoryStream memoryStream = new MemoryStream(data))
-            {
-                return (T)_binaryFormatter.Deserialize(memoryStream);
-            }
+            return MessagePackSerializer.Deserialize<T>(data);
         }
     }
 }

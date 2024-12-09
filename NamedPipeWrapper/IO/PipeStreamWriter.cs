@@ -1,9 +1,8 @@
+using MessagePack;
 using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace NamedPipeWrapper.IO
@@ -26,8 +25,6 @@ namespace NamedPipeWrapper.IO
         /// </summary>
         internal PipeStream BaseStream { get; private set; }
 
-        private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
-
         /// <summary>
         /// Constructs a new <see cref="PipeStreamWriter{T}"/>
         /// object that writes to given <paramref name="stream"/>.
@@ -49,7 +46,7 @@ namespace NamedPipeWrapper.IO
         /// <param name="obj">
         /// The object to write to the pipe.
         /// </param>
-        /// <exception cref="SerializationException"/>
+        /// <exception cref="MessagePackSerializationException"/>
         internal void WriteObject(T obj)
         {
             byte[] data;
@@ -59,7 +56,7 @@ namespace NamedPipeWrapper.IO
             }
             else
             {
-                data = Serialize(obj);
+                data = MessagePackSerializer.Serialize(obj);
                 WriteLength(data.Length);
             }
             BaseStream.Write(data, 0, data.Length);
@@ -75,16 +72,6 @@ namespace NamedPipeWrapper.IO
         internal void WaitForPipeDrain()
         {
             BaseStream.WaitForPipeDrain();
-        }
-
-        /// <exception cref="SerializationException"/>
-        private byte[] Serialize(T obj)
-        {
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                _binaryFormatter.Serialize(memoryStream, obj);
-                return memoryStream.ToArray();
-            }
         }
 
         private void WriteLength(int len)
