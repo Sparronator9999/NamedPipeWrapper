@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
-using System.Text;
 
 namespace NamedPipeWrapper.IO
 {
@@ -49,18 +48,15 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="MessagePackSerializationException"/>
         internal void WriteObject(T obj)
         {
-            byte[] data;
-            if (typeof(T) == typeof(string))
+            if (!(obj is null))
             {
-                data = Encoding.Unicode.GetBytes(obj.ToString());
+                byte[] data = MessagePackSerializer.Serialize(obj);
+                byte[] lenBuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(data.Length));
+
+                BaseStream.Write(lenBuf, 0, lenBuf.Length);
+                BaseStream.Write(data, 0, data.Length);
+                BaseStream.Flush();
             }
-            else
-            {
-                data = MessagePackSerializer.Serialize(obj);
-                WriteLength(data.Length);
-            }
-            BaseStream.Write(data, 0, data.Length);
-            BaseStream.Flush();
         }
 
         /// <summary>
@@ -72,12 +68,6 @@ namespace NamedPipeWrapper.IO
         internal void WaitForPipeDrain()
         {
             BaseStream.WaitForPipeDrain();
-        }
-
-        private void WriteLength(int len)
-        {
-            byte[] lenbuf = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(len));
-            BaseStream.Write(lenbuf, 0, lenbuf.Length);
         }
     }
 }

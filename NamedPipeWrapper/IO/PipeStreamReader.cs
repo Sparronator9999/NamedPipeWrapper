@@ -27,7 +27,12 @@ namespace NamedPipeWrapper.IO
         /// <summary>
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
-        internal bool IsConnected { get; private set; }
+        internal bool IsConnected => BaseStream.IsConnected;
+
+        private readonly MessagePackSerializerOptions _options =
+            MessagePackSerializerOptions.Standard.WithSecurity(MessagePackSecurity.UntrustedData);
+
+        private const int SIZE_INT = sizeof(int);
 
         /// <summary>
         /// Constructs a new <see cref="PipeStreamReader{T}"/> object
@@ -39,7 +44,6 @@ namespace NamedPipeWrapper.IO
         internal PipeStreamReader(PipeStream stream)
         {
             BaseStream = stream;
-            IsConnected = stream.IsConnected;
         }
 
         /// <summary>
@@ -53,18 +57,9 @@ namespace NamedPipeWrapper.IO
         /// The next object read from the pipe, or
         /// <c>null</c> if the pipe disconnected.
         /// </returns>
-        /// <exception cref="SerializationException"/>
+        /// <exception cref="MessagePackSerializationException"/>
         internal T ReadObject()
         {
-            if (typeof(T) == typeof(string))
-            {
-                const int bufferSize = 1024;
-                byte[] data = new byte[bufferSize];
-                BaseStream.Read(data, 0, bufferSize);
-                string message = Encoding.Unicode.GetString(data).TrimEnd('\0');
-
-                return (message.Length > 0 ? message : null) as T;
-            }
             int len = ReadLength();
             return len == 0 ? default : ReadObject(len);
         }
@@ -77,25 +72,24 @@ namespace NamedPipeWrapper.IO
         /// <exception cref="IOException"/>
         private int ReadLength()
         {
-            const int lensize = sizeof(int);
-            byte[] lenbuf = new byte[lensize];
-            int bytesRead = BaseStream.Read(lenbuf, 0, lensize);
-            if (bytesRead == 0)
-            {
-                IsConnected = false;
-                return 0;
-            }
-            return bytesRead != lensize
-                ? throw new IOException($"Expected {lensize} bytes but read {bytesRead}")
-                : IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
+            byte[] lenbuf = new byte[SIZE_INT];
+            int bytesRead = BaseStream.Read(lenbuf, 0, SIZE_INT);
+            return bytesRead == 0
+                ? 0
+                : bytesRead != SIZE_INT
+                    ? throw new IOException($"Expected {SIZE_INT} bytes, but read {bytesRead}.")
+                    : IPAddress.NetworkToHostOrder(BitConverter.ToInt32(lenbuf, 0));
         }
 
         /// <exception cref="MessagePackSerializationException"/>
         private T ReadObject(int len)
         {
             byte[] data = new byte[len];
-            BaseStream.Read(data, 0, len);
-            return MessagePackSerializer.Deserialize<T>(data);
+            int bytesRead = BaseStream.Read(data, 0, data.Length);
+            return bytesRead == len
+                ? MessagePackSerializer.Deserialize<T>(data, _options)
+                : throw new IOException($"Expected {len} bytes, but read {bytesRead}.");
+
         }
     }
 }

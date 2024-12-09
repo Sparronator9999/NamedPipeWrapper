@@ -393,7 +393,11 @@ namespace NamedPipeWrapper
 
         private static void Cleanup(NamedPipeServerStream pipe)
         {
-            if (pipe == null) return;
+            if (pipe is null)
+            {
+                return;
+            }
+
             using (NamedPipeServerStream x = pipe)
             {
                 x.Close();

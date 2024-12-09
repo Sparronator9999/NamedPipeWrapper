@@ -129,7 +129,9 @@ namespace NamedPipeWrapper
         {
             // Only notify observers once
             if (_notifiedSucceeded)
+            {
                 return;
+            }
 
             _notifiedSucceeded = true;
 
