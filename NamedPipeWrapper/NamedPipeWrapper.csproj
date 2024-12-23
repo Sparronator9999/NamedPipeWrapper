@@ -12,7 +12,7 @@
     <RepositoryUrl>https://github.com/Sparronator9999/NamedPipeWrapper</RepositoryUrl>
     <TargetFramework>net48</TargetFramework>
     <Title>Named Pipe Wrapper library</Title>
-    <VersionPrefix>2.0.2</VersionPrefix>
+    <VersionPrefix>2.1.0</VersionPrefix>
     <VersionSuffix>release</VersionSuffix>
   </PropertyGroup>
   <ItemGroup>

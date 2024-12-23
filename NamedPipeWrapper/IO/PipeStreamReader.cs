@@ -3,7 +3,6 @@ using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
-using System.Text;
 
 namespace NamedPipeWrapper.IO
 {
@@ -28,9 +27,6 @@ namespace NamedPipeWrapper.IO
         /// Gets a value indicating whether the pipe is connected or not.
         /// </summary>
         internal bool IsConnected => BaseStream.IsConnected;
-
-        private readonly MessagePackSerializerOptions _options =
-            MessagePackSerializerOptions.Standard.WithSecurity(MessagePackSecurity.UntrustedData);
 
         private const int SIZE_INT = sizeof(int);
 
@@ -87,7 +83,7 @@ namespace NamedPipeWrapper.IO
             byte[] data = new byte[len];
             int bytesRead = BaseStream.Read(data, 0, data.Length);
             return bytesRead == len
-                ? MessagePackSerializer.Deserialize<T>(data, _options)
+                ? MessagePackSerializer.Deserialize<T>(data, Constants.SerializerOptions)
                 : throw new IOException($"Expected {len} bytes, but read {bytesRead}.");
 
         }
