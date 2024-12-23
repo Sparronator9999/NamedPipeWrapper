@@ -14,7 +14,7 @@ using System.Threading;
 namespace NamedPipeWrapper.UnitTests
 {
     [TestFixture]
-    internal class SerializableTests : IDisposable
+    internal sealed class SerializableTests : IDisposable
     {
         private static readonly ILog Logger =
             LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -137,16 +137,15 @@ namespace NamedPipeWrapper.UnitTests
             if (_exceptions.Count != 0)
                 throw new AggregateException(_exceptions);
 
-            Assert.NotNull(_actualHash, $"Server should have received client's {_expectedData.Count} item message");
-            Assert.AreEqual(_expectedHash, _actualHash, $"Hash codes for {_expectedData.Count} item message should match");
-            Assert.AreEqual(_expectedData.Count, _actualData.Count, "Collection lengths should be equal");
+            Assert.That(_expectedHash == _actualHash, $"Hash codes for {_expectedData.Count} item message should match");
+            Assert.That(_expectedData.Count == _actualData.Count, "Collection lengths should be equal");
 
             for (int i = 0; i < _actualData.Count; i++)
             {
                 TestItem expectedItem = _expectedData[i];
                 TestItem actualItem = _actualData[i];
-                Assert.AreEqual(expectedItem, actualItem, $"Items at index {i} should be equal");
-                Assert.AreEqual(actualItem.Parent, _actualData, $"Item at index {i}'s Parent property should reference the item's parent collection");
+                Assert.That(expectedItem == actualItem, $"Items at index {i} should be equal");
+                Assert.That(actualItem.Parent == _actualData, $"Item at index {i}'s Parent property should reference the item's parent collection");
             }
         }
 
@@ -191,7 +190,7 @@ namespace NamedPipeWrapper.UnitTests
     }
 
     [Serializable]
-    internal class TestCollection : List<TestItem>
+    internal sealed class TestCollection : List<TestItem>
     {
         public override int GetHashCode()
         {
@@ -227,7 +226,7 @@ namespace NamedPipeWrapper.UnitTests
     }
 
     [Serializable]
-    internal class TestItem
+    internal sealed class TestItem
     {
         public readonly int ID;
         public readonly TestCollection Parent;
@@ -240,7 +239,7 @@ namespace NamedPipeWrapper.UnitTests
             Enum = @enum;
         }
 
-        protected bool Equals(TestItem other)
+        private bool Equals(TestItem other)
         {
             return ID == other.ID && Enum == other.Enum;
         }
