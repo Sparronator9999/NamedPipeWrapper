@@ -1,10 +1,9 @@
 ﻿using NamedPipeWrapper.IO;
 using NamedPipeWrapper.Threading;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -58,8 +57,8 @@ namespace NamedPipeWrapper
 
         private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
 
-        private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
-        private readonly Queue<TWrite> _writeQueue = new Queue<TWrite>();
+        private readonly BlockingCollection<TWrite> _writeQueue =
+            new BlockingCollection<TWrite>();
 
         private bool _notifiedSucceeded;
 
@@ -82,10 +81,9 @@ namespace NamedPipeWrapper
         /// <param name="message">
         /// The message to write to the named pipe.
         /// </param>
-        public void PushMessage(TWrite message)
+        public bool PushMessage(TWrite message)
         {
-            _writeQueue.Enqueue(message);
-            _writeSignal.Set();
+            return _writeQueue.TryAdd(message);
         }
 
         /// <summary>
@@ -118,7 +116,7 @@ namespace NamedPipeWrapper
         internal void Close()
         {
             _streamWrapper.Close();
-            _writeSignal.Set();
+            _writeQueue.CompleteAdding();
         }
 
         /// <summary>
@@ -134,8 +132,7 @@ namespace NamedPipeWrapper
 
             _notifiedSucceeded = true;
 
-            PipeConnectionEventArgs<TRead, TWrite> e2 = new PipeConnectionEventArgs<TRead, TWrite>(this);
-            Disconnected?.Invoke(sender, e2);
+            Disconnected?.Invoke(sender, new PipeConnectionEventArgs<TRead, TWrite>(this));
         }
 
         /// <summary>
@@ -154,15 +151,14 @@ namespace NamedPipeWrapper
             while (IsConnected && _streamWrapper.CanRead)
             {
                 TRead obj = _streamWrapper.ReadObject();
-                if (obj == null)
+                if (obj is null)
                 {
                     Close();
                     return;
                 }
-                PipeMessageEventArgs<TRead, TWrite> e =
-                    new PipeMessageEventArgs<TRead, TWrite>(this, obj);
 
-                ReceiveMessage?.Invoke(this, e);
+                ReceiveMessage?.Invoke(this,
+                    new PipeMessageEventArgs<TRead, TWrite>(this, obj));
             }
         }
 
@@ -173,10 +169,9 @@ namespace NamedPipeWrapper
         {
             while (IsConnected && _streamWrapper.CanWrite)
             {
-                _writeSignal.WaitOne();
-                while (_writeQueue.Count > 0)
+                if (_writeQueue.TryTake(out TWrite obj))
                 {
-                    _streamWrapper.WriteObject(_writeQueue.Dequeue());
+                    _streamWrapper.WriteObject(obj);
                     _streamWrapper.WaitForPipeDrain();
                 }
             }
@@ -197,7 +192,8 @@ namespace NamedPipeWrapper
 
             if (disposing)
             {
-                _writeSignal.Dispose();
+                Close();
+                _writeQueue.Dispose();
             }
 
             _disposed = true;
