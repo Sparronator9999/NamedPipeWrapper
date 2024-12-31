@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace NamedPipeWrapper
 {
@@ -57,6 +58,7 @@ namespace NamedPipeWrapper
 
         private readonly PipeStreamWrapper<TRead, TWrite> _streamWrapper;
 
+        private readonly AutoResetEvent _writeSignal = new AutoResetEvent(false);
         private readonly BlockingCollection<TWrite> _writeQueue =
             new BlockingCollection<TWrite>();
 
@@ -83,7 +85,7 @@ namespace NamedPipeWrapper
         /// </param>
         public bool PushMessage(TWrite message)
         {
-            return _writeQueue.TryAdd(message);
+            return _writeQueue.TryAdd(message) && _writeSignal.Set();
         }
 
         /// <summary>
@@ -117,6 +119,7 @@ namespace NamedPipeWrapper
         {
             _streamWrapper.Close();
             _writeQueue.CompleteAdding();
+            _writeSignal.Set();
         }
 
         /// <summary>
@@ -169,7 +172,8 @@ namespace NamedPipeWrapper
         {
             while (IsConnected && _streamWrapper.CanWrite)
             {
-                if (_writeQueue.TryTake(out TWrite obj))
+                _writeSignal.WaitOne();
+                while (_writeQueue.TryTake(out TWrite obj) || _writeQueue.Count > 0)
                 {
                     _streamWrapper.WriteObject(obj);
                     _streamWrapper.WaitForPipeDrain();
@@ -193,6 +197,7 @@ namespace NamedPipeWrapper
             if (disposing)
             {
                 Close();
+                _writeSignal.Dispose();
                 _writeQueue.Dispose();
             }
 
