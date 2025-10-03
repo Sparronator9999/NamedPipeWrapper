@@ -1,5 +1,8 @@
 # Named Pipe Wrapper for .NET
 
+> [!IMPORTANT]
+> This project has been archived as of Oct 3, 2025, due to lack of time to update this fork, and will not be moved to [my Codeberg account](https://codeberg.org/Sparronator9999). You can find more up-to-date code in two of my main projects, [YAMDCC](https://codeberg.org/Sparronator9999/YAMDCC) and [OpenBootCamp](https://codeberg.org/Sparronator9999/OpenBootCamp), which prompted this fork in the first place to fix some issues and add a few new features.
+
 A simple, easy to use, strongly-typed wrapper around .NET named pipes.
 
 ## NuGet Package
